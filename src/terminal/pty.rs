@@ -83,6 +83,8 @@ pub(crate) fn spawn(launch: &Launch, size: TermSize, cell: (u16, u16)) -> anyhow
         working_directory: launch.cwd.clone(),
         drain_on_exit: true,
         env,
+        #[cfg(target_os = "windows")]
+        escape_args: true,
     };
     let pty = tty::new(&options, window_size(&size, cell), 0)?;
     let event_loop = EventLoop::new(term.clone(), listener, pty, true, false)?;
