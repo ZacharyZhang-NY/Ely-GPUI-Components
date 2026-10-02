@@ -1,14 +1,15 @@
 use std::rc::Rc;
 
 use gpui::{
-    App, ElementId, Entity, IntoElement, ParentElement, RenderOnce, SharedString, Styled, Window,
-    div, prelude::*,
+    App, ElementId, Entity, IntoElement, ParentElement, RenderOnce, Role, SharedString,
+    StatefulInteractiveElement, Styled, Window, div, prelude::*,
 };
 
 use super::{Close, Dialog};
 use crate::{
     buttons::{Button, ButtonVariant},
     forms::{Input, Run, TextInput},
+    i18n,
     primitives::{Icon, Severity},
     theme::{ActiveTheme, ControlSize, IconSize, TextSize},
 };
@@ -156,10 +157,11 @@ impl RenderOnce for ConfirmDialog {
         };
         let (cancel_id, confirm_id) = ((self.id.clone(), "cancel"), (self.id.clone(), "confirm"));
         let on_close = self.on_close;
+        let cancel = i18n::text(cx, "dialog.cancel", &[]);
         Dialog::new(self.id, self.title, move |window, cx| on_close(window, cx))
             .child(said(None, self.message, cx))
             .action(move |close| {
-                Button::new(cancel_id, "Cancel")
+                Button::new(cancel_id, cancel)
                     .variant(ButtonVariant::Ghost)
                     .on_click(move |_, window, cx| close(window, cx))
             })
@@ -295,6 +297,9 @@ impl RenderOnce for PromptDialog {
                 |field, reason| {
                     field.child(
                         div()
+                            .id((self.id.clone(), "error"))
+                            .role(Role::Label)
+                            .aria_label(reason.clone())
                             .text_size(theme.text_size(TextSize::Xs))
                             .text_color(colors.danger)
                             .child(reason),
@@ -306,13 +311,14 @@ impl RenderOnce for PromptDialog {
             (self.id.clone(), "submit"),
             self.submit,
         );
+        let cancel = i18n::text(cx, "dialog.cancel", &[]);
         let on_close = self.on_close;
         Dialog::new(self.id, self.title, move |window, cx| on_close(window, cx))
             .focus_first(self.field.read(cx).focus().clone())
             .on_enter(move |close| Rc::new(move |window, cx| lifted(&close, window, cx)))
             .child(field)
             .action(move |close| {
-                Button::new(cancel_id, "Cancel")
+                Button::new(cancel_id, cancel)
                     .variant(ButtonVariant::Ghost)
                     .on_click(move |_, window, cx| close(window, cx))
             })

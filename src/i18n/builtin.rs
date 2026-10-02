@@ -32,6 +32,9 @@ const EN: &[(&str, &str)] = &[
     ("palette.branch.delete", "Delete"),
     ("palette.history.placeholder", "Search past commands"),
     ("palette.history.empty", "No past command fits"),
+    ("dialog.cancel", "Cancel"),
+    ("dialog.close", "Close"),
+    ("state.unavailable", "Unavailable"),
 ];
 
 const ZH_CN: &[(&str, &str)] = &[
@@ -62,6 +65,9 @@ const ZH_CN: &[(&str, &str)] = &[
     ("palette.branch.delete", "删除"),
     ("palette.history.placeholder", "搜索历史命令"),
     ("palette.history.empty", "没有匹配的历史命令"),
+    ("dialog.cancel", "取消"),
+    ("dialog.close", "关闭"),
+    ("state.unavailable", "不可用"),
 ];
 
 /// Ely's own message for `key` in `locale`, English for a locale Ely does not ship; fails on an unknown key.

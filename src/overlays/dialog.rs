@@ -2,15 +2,15 @@ use std::rc::Rc;
 
 use gpui::{
     Animation, AnimationExt, AnyElement, App, ElementId, FocusHandle, FontWeight,
-    InteractiveElement, IntoElement, ParentElement, Pixels, RenderOnce, SharedString, Styled,
-    Window, anchored, div, point, prelude::*,
+    InteractiveElement, IntoElement, ParentElement, Pixels, RenderOnce, Role, SharedString,
+    StatefulInteractiveElement, Styled, Window, anchored, div, point, prelude::*,
 };
 use smallvec::SmallVec;
 
 use crate::{
     buttons::{ButtonVariant, IconButton},
     forms::{Enter, Run},
-    motion,
+    i18n, motion,
     primitives::{Backdrop, FocusScope, IconName, give_back, raise, take_focus},
     theme::{ActiveTheme, Elevation, Radius, TextSize},
 };
@@ -119,6 +119,7 @@ impl RenderOnce for Dialog {
         };
         let theme = cx.theme();
         let colors = &theme.colors;
+        let (title, description) = (self.title.clone(), self.detail.clone());
         let heading = div()
             .flex_none()
             .flex()
@@ -164,6 +165,9 @@ impl RenderOnce for Dialog {
         let card = if fullscreen {
             div()
                 .id(self.id.clone())
+                .role(Role::Dialog)
+                .aria_label(title)
+                .when_some(description, |card, text| card.aria_description(text))
                 .flex()
                 .flex_col()
                 .size_full()
@@ -182,7 +186,7 @@ impl RenderOnce for Dialog {
                         .child(
                             IconButton::new((self.id.clone(), "close"), IconName::X)
                                 .variant(ButtonVariant::Ghost)
-                                .tooltip("Close")
+                                .tooltip(i18n::text(cx, "dialog.close", &[]))
                                 .on_click(move |_, window, cx| button(window, cx)),
                         ),
                 )
@@ -214,6 +218,9 @@ impl RenderOnce for Dialog {
             });
             div()
                 .id(self.id.clone())
+                .role(Role::Dialog)
+                .aria_label(title)
+                .when_some(description, |card, text| card.aria_description(text))
                 .flex()
                 .flex_col()
                 .gap_5()

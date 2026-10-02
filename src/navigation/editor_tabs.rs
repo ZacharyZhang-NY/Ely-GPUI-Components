@@ -10,6 +10,7 @@ use super::TabOverflowMenu;
 use crate::{
     buttons::{ButtonVariant, IconButton},
     forms::Choice,
+    i18n,
     primitives::{DragGhost, Icon, IconName},
     theme::{ActiveTheme, ControlSize, IconSize, TextSize},
 };
@@ -206,7 +207,7 @@ impl RenderOnce for EditorTabs {
                         IconButton::new(("close", ix), IconName::X)
                             .size(ControlSize::Sm)
                             .variant(ButtonVariant::Ghost)
-                            .tooltip("Close")
+                            .tooltip(i18n::text(cx, "dialog.close", &[]))
                             .on_click(move |_, window, cx| {
                                 cx.stop_propagation();
                                 run(&close, "close", &slot_id, window, cx);

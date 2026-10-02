@@ -5,6 +5,7 @@ use gpui::{
 
 use super::button::{ButtonVariant, ClickHandler, label_size, tone};
 use crate::{
+    i18n,
     primitives::{FocusRing, Icon, IconName, Tooltip},
     theme::{ActiveTheme, ControlSize, Radius},
 };
@@ -92,7 +93,10 @@ impl RenderOnce for IconButton {
             .when_some(self.tooltip, |el, text| el.tooltip(Tooltip::text(text)))
             .map(|el| {
                 if self.disabled {
-                    return el.opacity(0.45).cursor_not_allowed();
+                    return el
+                        .aria_description(i18n::text(cx, "state.unavailable", &[]))
+                        .opacity(0.45)
+                        .cursor_not_allowed();
                 }
                 el.cursor_pointer()
                     .tab_index(0)

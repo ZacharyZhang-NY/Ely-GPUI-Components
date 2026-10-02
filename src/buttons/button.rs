@@ -5,6 +5,7 @@ use gpui::{
 };
 
 use crate::{
+    i18n,
     motion::Spinner,
     primitives::{FocusRing, Icon, IconName},
     theme::{ActiveTheme, ControlSize, IconSize, Mix, Palette, Platform, Radius, TextSize},
@@ -291,7 +292,10 @@ impl RenderOnce for Button {
             })
             .map(|el| {
                 if self.disabled {
-                    return el.opacity(0.45).cursor_not_allowed();
+                    return el
+                        .aria_description(i18n::text(cx, "state.unavailable", &[]))
+                        .opacity(0.45)
+                        .cursor_not_allowed();
                 }
                 let el = match &self.focus {
                     Some(handle) => el.track_focus(handle),
