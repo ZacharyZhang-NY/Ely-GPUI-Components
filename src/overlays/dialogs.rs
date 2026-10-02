@@ -15,10 +15,18 @@ use crate::{
 };
 
 /// The row a message sits in: its severity's icon on a quiet disc, then the text.
-fn said(severity: Option<Severity>, message: SharedString, cx: &App) -> impl IntoElement {
+fn said(
+    id: &ElementId,
+    severity: Option<Severity>,
+    message: SharedString,
+    cx: &App,
+) -> impl IntoElement {
     let theme = cx.theme();
     let colors = &theme.colors;
     div()
+        .id((id.clone(), "said"))
+        .role(Role::Label)
+        .aria_label(message.clone())
         .flex()
         .items_start()
         .gap_3()
@@ -87,10 +95,11 @@ impl AlertDialog {
 impl RenderOnce for AlertDialog {
     fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
         let (ok, label) = ((self.id.clone(), "ok"), self.label);
+        let id = self.id.clone();
         let on_close = self.on_close;
         Dialog::new(self.id, self.title, move |window, cx| on_close(window, cx))
             .held()
-            .child(said(Some(self.severity), self.message, cx))
+            .child(said(&id, Some(self.severity), self.message, cx))
             .action(move |close| {
                 Button::new(ok, label)
                     .primary()
@@ -159,7 +168,7 @@ impl RenderOnce for ConfirmDialog {
         let on_close = self.on_close;
         let cancel = i18n::text(cx, "dialog.cancel", &[]);
         Dialog::new(self.id, self.title, move |window, cx| on_close(window, cx))
-            .child(said(None, self.message, cx))
+            .child(said(&id, None, self.message, cx))
             .action(move |close| {
                 Button::new(cancel_id, cancel)
                     .variant(ButtonVariant::Ghost)
