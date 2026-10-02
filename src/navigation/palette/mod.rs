@@ -7,8 +7,8 @@ use std::{ops::Range, rc::Rc};
 
 use gpui::{
     Animation, AnimationExt, AnyElement, App, ElementId, Entity, FontWeight, HighlightStyle,
-    InteractiveElement, IntoElement, MouseButton, ParentElement, Point, ScrollHandle, SharedString,
-    StatefulInteractiveElement, Styled, StyledText, Window, div, prelude::*,
+    InteractiveElement, IntoElement, MouseButton, ParentElement, Point, Role, ScrollHandle,
+    SharedString, StatefulInteractiveElement, Styled, StyledText, Window, div, prelude::*,
 };
 
 use crate::{
@@ -102,6 +102,8 @@ pub(crate) fn marked(text: SharedString, hits: Vec<Range<usize>>, cx: &App) -> A
 /// One result: the value a pick hands back, then what the row shows.
 pub(crate) struct Row {
     pub value: SharedString,
+    /// The row's plain name, for assistive technology.
+    pub name: SharedString,
     pub icon: Option<IconName>,
     pub label: AnyElement,
     pub detail: Option<AnyElement>,
@@ -125,7 +127,7 @@ struct Cursor {
 /// The query field kept for palette `id`.
 pub(crate) fn query_field(
     id: &ElementId,
-    placeholder: &'static str,
+    placeholder: SharedString,
     window: &mut Window,
     cx: &mut App,
 ) -> Entity<TextInput> {
@@ -250,6 +252,9 @@ impl Palette {
                 children.push(
                     div()
                         .id(("row", ix))
+                        .role(Role::ListBoxOption)
+                        .aria_selected(ix == at)
+                        .aria_label(row.name.clone())
                         .flex()
                         .flex_none()
                         .items_center()
@@ -328,11 +333,9 @@ impl Palette {
                 cx.stop_propagation();
                 down(1, cx);
             })
-            .capture_action(|_: &Enter, _, cx| cx.stop_propagation())
-            .on_key_up(move |event, window, cx| {
-                let stroke = &event.keystroke;
-                if stroke.key == "enter" && !stroke.modifiers.modified() && count > 0 {
-                    cx.stop_propagation();
+            .capture_action(move |_: &Enter, window, cx| {
+                cx.stop_propagation();
+                if count > 0 {
                     enter(chosen.read(cx).at.min(count - 1), window, cx);
                 }
             })
@@ -363,6 +366,7 @@ impl Palette {
             .child(
                 div()
                     .id((self.id.clone(), "list"))
+                    .role(Role::ListBox)
                     .flex()
                     .flex_col()
                     .flex_1()

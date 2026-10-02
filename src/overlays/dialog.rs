@@ -69,7 +69,7 @@ impl Dialog {
         self
     }
 
-    /// Runs on an unmodified Enter release while the `focus_first` field holds focus; `build` gets the dialog's close.
+    /// Runs on an unmodified Enter while the `focus_first` field holds focus; `build` gets the dialog's close. The field's key binding fires on key-down, so an Enter an IME takes never reaches it.
     pub(crate) fn on_enter(mut self, build: impl FnOnce(Close) -> Run + 'static) -> Self {
         self.enter = Some(Box::new(build));
         self
@@ -254,18 +254,12 @@ impl RenderOnce for Dialog {
                 }
             })
             .when_some(enter, |layer, (field, enter)| {
-                layer
-                    .capture_action(|_: &Enter, _, cx| cx.stop_propagation())
-                    .on_key_up(move |event, window, cx| {
-                        let stroke = &event.keystroke;
-                        if stroke.key == "enter"
-                            && !stroke.modifiers.modified()
-                            && field.is_focused(window)
-                        {
-                            cx.stop_propagation();
-                            enter(window, cx);
-                        }
-                    })
+                layer.capture_action(move |_: &Enter, window, cx| {
+                    cx.stop_propagation();
+                    if field.is_focused(window) {
+                        enter(window, cx);
+                    }
+                })
             })
             .child(
                 FocusScope::new(&focus)

@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use gpui::{
     AnyElement, App, ElementId, EntityId, InteractiveElement, IntoElement, MouseButton,
-    ParentElement, Pixels, RenderOnce, ScrollHandle, SharedString, StatefulInteractiveElement,
-    Styled, Window, canvas, div, prelude::*,
+    ParentElement, Pixels, RenderOnce, Role, ScrollHandle, SharedString,
+    StatefulInteractiveElement, Styled, Window, canvas, div, prelude::*,
 };
 
 use super::TabOverflowMenu;
@@ -246,6 +246,9 @@ impl RenderOnce for EditorTabs {
                 let (title, icon, edge) = (tab.title.clone(), tab.icon, colors.focus);
                 div()
                     .id(tab.id.clone())
+                    .role(Role::Tab)
+                    .aria_selected(on)
+                    .aria_label(tab.title.clone())
                     .group(group)
                     .relative()
                     .flex()

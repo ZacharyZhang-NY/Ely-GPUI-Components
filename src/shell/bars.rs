@@ -1,7 +1,7 @@
 use gpui::{
     AnyElement, App, ClickEvent, Div, ElementId, InteractiveElement, IntoElement, ParentElement,
-    RenderOnce, SharedString, StatefulInteractiveElement, StyleRefinement, Styled, Window, div,
-    prelude::*,
+    RenderOnce, Role, SharedString, StatefulInteractiveElement, StyleRefinement, Styled, Window,
+    div, prelude::*,
 };
 use smallvec::SmallVec;
 
@@ -220,6 +220,11 @@ impl RenderOnce for StatusBarItem {
     fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
         let theme = cx.theme();
         let hover = theme.colors.hover;
+        let name = self
+            .label
+            .clone()
+            .or_else(|| self.tooltip.clone())
+            .or_else(|| self.icon.map(|icon| icon.name().into()));
         div()
             .id(self.id)
             .flex()
@@ -239,6 +244,11 @@ impl RenderOnce for StatusBarItem {
             .when_some(self.label, |item, label| item.child(label))
             .when_some(self.tooltip, |item, text| item.tooltip(Tooltip::text(text)))
             .when_some(self.on_click, |item, handler| {
+                let item = item.role(Role::Button);
+                let item = match name {
+                    Some(name) => item.aria_label(name),
+                    None => item,
+                };
                 item.cursor_pointer()
                     .hover(|style| style.bg(hover))
                     .on_click(handler)

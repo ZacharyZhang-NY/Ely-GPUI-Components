@@ -1,6 +1,7 @@
 use gpui::{
     App, ClickEvent, ElementId, FocusHandle, FontWeight, Hsla, IntoElement, MouseButton,
-    RenderOnce, SharedString, Window, div, prelude::*, transparent_black,
+    RenderOnce, Role, SharedString, StatefulInteractiveElement, Window, div, prelude::*,
+    transparent_black,
 };
 
 use crate::{
@@ -232,6 +233,7 @@ impl RenderOnce for Button {
         let platform = cx.theme().platform;
         let hint = self.shortcut.map(|source| shortcut_text(&source, platform));
         let spinner = (self.id.clone(), "spinner");
+        let name = self.label.clone();
         let parts = div()
             .flex()
             .items_center()
@@ -251,6 +253,8 @@ impl RenderOnce for Button {
 
         div()
             .id(self.id)
+            .role(Role::Button)
+            .when(!name.is_empty(), |el| el.aria_label(name))
             .flex()
             .flex_none()
             .items_center()

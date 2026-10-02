@@ -7,6 +7,7 @@ use gpui::{
 
 use crate::{
     buttons::{ButtonVariant, IconButton},
+    i18n,
     navigation::{Group, Palette, Row, fuzzy, marked, query_field},
     primitives::{Icon, IconName},
     theme::{ActiveTheme, ControlSize, IconSize, Radius, TextSize},
@@ -87,7 +88,7 @@ impl RenderOnce for BranchSelector {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
         let input = query_field(
             &self.id,
-            "Switch to a branch, or name a new one",
+            i18n::text(cx, "palette.branch.placeholder", &[]),
             window,
             cx,
         );
@@ -104,6 +105,7 @@ impl RenderOnce for BranchSelector {
                 score,
                 Row {
                     value: branch.name.clone(),
+                    name: branch.name.clone(),
                     icon: Some(if branch.current {
                         IconName::Check
                     } else {
@@ -125,7 +127,7 @@ impl RenderOnce for BranchSelector {
                 },
             ))
         };
-        let group = |title: &'static str, remote: bool, cx: &App| {
+        let group = |title: SharedString, remote: bool, cx: &App| {
             let mut rows: Vec<(i32, Row)> = self
                 .branches
                 .iter()
@@ -136,26 +138,29 @@ impl RenderOnce for BranchSelector {
                 rows.sort_by(|(a, _), (b, _)| b.cmp(a));
             }
             Group {
-                title: Some(title.into()),
+                title: Some(title),
                 rows: rows.into_iter().map(|(_, row)| row).collect(),
             }
         };
-        let mut groups = vec![group("Local", false, cx), group("Remote", true, cx)];
+        let mut groups = vec![
+            group(i18n::text(cx, "palette.branch.local", &[]), false, cx),
+            group(i18n::text(cx, "palette.branch.remote", &[]), true, cx),
+        ];
         let named = self
             .branches
             .iter()
             .any(|branch| branch.name.as_ref() == query);
         if !query.is_empty() && !named {
+            let create = i18n::text(cx, "palette.branch.create", &[("query", &query)]);
             groups.insert(
                 0,
                 Group {
                     title: None,
                     rows: vec![Row {
                         value: format!("{CREATE}{query}").into(),
+                        name: create.clone(),
                         icon: Some(IconName::Plus),
-                        label: div()
-                            .child(format!("Create branch “{query}”"))
-                            .into_any_element(),
+                        label: div().child(create).into_any_element(),
                         detail: None,
                         end: None,
                     }],
@@ -184,7 +189,7 @@ impl RenderOnce for BranchSelector {
             input,
             groups,
             start: 0,
-            empty: "No branch fits".into(),
+            empty: i18n::text(cx, "palette.branch.empty", &[]),
             on_pick: Some(on_pick),
             on_close: self.on_close,
         }
@@ -242,7 +247,7 @@ pub(super) fn listed(
 pub(super) fn action(
     id: ElementId,
     icon: IconName,
-    words: &'static str,
+    words: impl Into<SharedString>,
     run: Option<Run>,
 ) -> AnyElement {
     IconButton::new(id, icon)
@@ -320,13 +325,13 @@ impl RenderOnce for BranchList {
                         action(
                             (self.id.clone(), format!("switch-{}", branch.name)).into(),
                             IconName::ArrowRight,
-                            "Switch to it",
+                            i18n::text(cx, "palette.branch.switch", &[]),
                             bind(&self.on_switch),
                         ),
                         action(
                             (self.id.clone(), format!("delete-{}", branch.name)).into(),
                             IconName::Trash2,
-                            "Delete",
+                            i18n::text(cx, "palette.branch.delete", &[]),
                             bind(&self.on_delete),
                         ),
                     ]

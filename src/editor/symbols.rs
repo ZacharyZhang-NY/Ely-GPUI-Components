@@ -6,6 +6,7 @@ use gpui::{
 
 use crate::{
     buttons::SegmentedControl,
+    i18n,
     lists::{Tree, TreeNode},
     navigation::{Group, Palette, Row, fuzzy, marked, query_field},
     primitives::IconName,
@@ -258,7 +259,12 @@ impl GoToSymbol {
 
 impl RenderOnce for GoToSymbol {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
-        let input = query_field(&self.id, "Go to a symbol", window, cx);
+        let input = query_field(
+            &self.id,
+            i18n::text(cx, "palette.symbol.placeholder", &[]),
+            window,
+            cx,
+        );
         let query = input.read(cx).text().trim().to_string();
         let colors = cx.theme().colors.clone();
         let mut found: Vec<(i32, Row)> = flattened(&self.symbols)
@@ -278,6 +284,7 @@ impl RenderOnce for GoToSymbol {
                 });
                 let row = Row {
                     value: symbol.line.to_string().into(),
+                    name: symbol.name.clone(),
                     icon: Some(symbol.kind.icon()),
                     label: marked(symbol.name.clone(), hits, cx),
                     detail,
@@ -310,7 +317,7 @@ impl RenderOnce for GoToSymbol {
                 rows: found.into_iter().map(|(_, row)| row).collect(),
             }],
             start: 0,
-            empty: "No matching symbols".into(),
+            empty: i18n::text(cx, "palette.symbol.empty", &[]),
             on_pick,
             on_close: self.on_close,
         }

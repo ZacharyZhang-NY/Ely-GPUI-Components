@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use gpui::{
     Animation, AnimationExt, AnyElement, App, ElementId, FontWeight, InteractiveElement,
-    IntoElement, MouseButton, ParentElement, RenderOnce, SharedString, StatefulInteractiveElement,
-    Styled, Window, div, prelude::*,
+    IntoElement, MouseButton, ParentElement, RenderOnce, Role, SharedString,
+    StatefulInteractiveElement, Styled, Window, div, prelude::*,
 };
 
 use crate::{
@@ -150,6 +150,9 @@ impl RenderOnce for Tabs {
                 let pick = pick.clone();
                 div()
                     .id(("tab", ix))
+                    .role(Role::Tab)
+                    .aria_selected(on)
+                    .aria_label(tab.label.clone())
                     .relative()
                     .flex()
                     .items_center()
@@ -195,6 +198,7 @@ impl RenderOnce for Tabs {
         let (keys, key_pick) = (tabs.clone(), pick.clone());
         let strip = div()
             .id((self.id.clone(), "strip"))
+            .role(Role::TabList)
             .track_focus(&focus)
             .relative()
             .flex()

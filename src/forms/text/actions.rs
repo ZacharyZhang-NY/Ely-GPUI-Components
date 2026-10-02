@@ -1,7 +1,7 @@
 use gpui::{
     App, ClipboardItem, Context, CursorStyle, InteractiveElement, IntoElement, KeyBinding,
-    MouseButton, MouseDownEvent, MouseMoveEvent, ParentElement, Render, Styled, Window, actions,
-    div,
+    MouseButton, MouseDownEvent, MouseMoveEvent, ParentElement, Render, Role,
+    StatefulInteractiveElement, Styled, Window, actions, div, prelude::*,
 };
 
 use super::{
@@ -359,6 +359,11 @@ impl Render for TextInput {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
             .id("ely-text-input")
+            .role(Role::TextInput)
+            .when(!self.placeholder.is_empty(), |el| {
+                el.aria_label(self.placeholder.clone())
+            })
+            .when(!self.masked, |el| el.aria_value(self.text.clone()))
             .key_context(CONTEXT)
             .track_focus(&self.focus)
             .cursor(if self.disabled {

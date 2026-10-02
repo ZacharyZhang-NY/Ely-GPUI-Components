@@ -9,6 +9,7 @@ use gpui::{
 use crate::{
     buttons::{ButtonVariant, IconButton},
     forms::Checkbox,
+    i18n,
     navigation::{Group, Palette, Row, fuzzy, marked, query_field},
     primitives::{Icon, IconName},
     theme::{ActiveTheme, ControlSize, IconSize, Radius, TextSize},
@@ -83,7 +84,7 @@ impl RenderOnce for RecentProjects {
             );
             let button = |key: &'static str,
                           icon: IconName,
-                          words: &'static str,
+                          words: SharedString,
                           action: Option<OnIndex>| {
                 IconButton::new((self.id.clone(), format!("{key}-{ix}")), icon)
                     .variant(ButtonVariant::Ghost)
@@ -96,6 +97,15 @@ impl RenderOnce for RecentProjects {
                         })
                     })
             };
+            let (pin_icon, pin_tip) = if project.pinned {
+                (
+                    IconName::PinOff,
+                    i18n::text(cx, "palette.project.unpin", &[]),
+                )
+            } else {
+                (IconName::Pin, i18n::text(cx, "palette.project.pin", &[]))
+            };
+            let remove_tip = i18n::text(cx, "palette.project.remove", &[]);
             div()
                 .id((self.id.clone(), format!("project-{ix}")))
                 .flex()
@@ -157,17 +167,8 @@ impl RenderOnce for RecentProjects {
                         .text_color(colors.fg_subtle)
                         .child(project.opened.clone()),
                 )
-                .child(button(
-                    "pin",
-                    if project.pinned {
-                        IconName::PinOff
-                    } else {
-                        IconName::Pin
-                    },
-                    if project.pinned { "Unpin" } else { "Pin" },
-                    pin,
-                ))
-                .child(button("remove", IconName::X, "Remove from recent", remove))
+                .child(button("pin", pin_icon, pin_tip, pin))
+                .child(button("remove", IconName::X, remove_tip, remove))
         });
         div()
             .flex()
@@ -212,7 +213,12 @@ impl ProjectSwitcher {
 
 impl RenderOnce for ProjectSwitcher {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
-        let input = query_field(&self.id, "Switch to a project", window, cx);
+        let input = query_field(
+            &self.id,
+            i18n::text(cx, "palette.project.placeholder", &[]),
+            window,
+            cx,
+        );
         let query = input.read(cx).text().trim().to_string();
         let colors = cx.theme().colors.clone();
         let mut found: Vec<(i32, Row)> = ordered(&self.projects)
@@ -227,6 +233,7 @@ impl RenderOnce for ProjectSwitcher {
                     score,
                     Row {
                         value: ix.to_string().into(),
+                        name: project.name.clone(),
                         icon: Some(if project.pinned {
                             IconName::Pin
                         } else {
@@ -271,7 +278,7 @@ impl RenderOnce for ProjectSwitcher {
                 rows: found.into_iter().map(|(_, row)| row).collect(),
             }],
             start: 0,
-            empty: "No matching projects".into(),
+            empty: i18n::text(cx, "palette.project.empty", &[]),
             on_pick,
             on_close: self.on_close,
         }

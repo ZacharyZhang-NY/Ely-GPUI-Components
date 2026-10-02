@@ -5,6 +5,7 @@ use gpui::{App, ElementId, IntoElement, RenderOnce, SharedString, Window};
 use super::{Fit, Group, Palette, Row, fuzzy, marked, query_field};
 use crate::{
     forms::{Choice, OnValue, Run},
+    i18n,
     primitives::IconName,
     typography::{Highlight, KbdCombo},
 };
@@ -60,6 +61,7 @@ impl Command {
     fn row(&self, hits: Vec<Range<usize>>, cx: &App) -> Row {
         Row {
             value: self.value.clone(),
+            name: self.label.clone(),
             icon: self.icon,
             label: marked(self.label.clone(), hits, cx),
             detail: None,
@@ -123,7 +125,8 @@ impl CommandPalette {
 
 impl RenderOnce for CommandPalette {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
-        let input = query_field(&self.id, "Type a command", window, cx);
+        let placeholder = i18n::text(cx, "palette.command.placeholder", &[]);
+        let input = query_field(&self.id, placeholder, window, cx);
         let query = input.read(cx).text().trim().to_string();
         let groups = if query.is_empty() {
             let find = |value: &SharedString| {
@@ -134,7 +137,7 @@ impl RenderOnce for CommandPalette {
                     .unwrap_or_else(|| panic!("recent command {value} is not in the palette"))
             };
             let recent = Group {
-                title: Some("Recent".into()),
+                title: Some(i18n::text(cx, "palette.recent", &[])),
                 rows: self
                     .recent
                     .iter()
@@ -182,7 +185,7 @@ impl RenderOnce for CommandPalette {
             input,
             groups,
             start: 0,
-            empty: "No matching commands".into(),
+            empty: i18n::text(cx, "palette.command.empty", &[]),
             on_pick: self.on_run,
             on_close: self.on_close,
         }
@@ -246,6 +249,7 @@ fn file_row(path: &SharedString, hits: &[Range<usize>], cx: &App) -> Row {
     let folder = &path[..name_at.saturating_sub(1)];
     Row {
         value: path.clone(),
+        name: path[name_at..].to_string().into(),
         icon: Some(IconName::File),
         label: marked(
             path[name_at..].to_string().into(),
@@ -260,7 +264,8 @@ fn file_row(path: &SharedString, hits: &[Range<usize>], cx: &App) -> Row {
 
 impl RenderOnce for QuickOpen {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
-        let input = query_field(&self.id, "Go to file", window, cx);
+        let placeholder = i18n::text(cx, "palette.open.placeholder", &[]);
+        let input = query_field(&self.id, placeholder, window, cx);
         let query = input.read(cx).text().trim().to_string();
         let (group, empty) = if query.is_empty() {
             let rows = self
@@ -270,10 +275,10 @@ impl RenderOnce for QuickOpen {
                 .collect();
             (
                 Group {
-                    title: Some("Recent".into()),
+                    title: Some(i18n::text(cx, "palette.recent", &[])),
                     rows,
                 },
-                "Type part of a file name",
+                i18n::text(cx, "palette.open.idle", &[]),
             )
         } else {
             let rows = ranked(self.paths.iter(), &query, |path| &path[..])
@@ -281,14 +286,17 @@ impl RenderOnce for QuickOpen {
                 .take(SHOWN)
                 .map(|(path, fit)| file_row(path, &fit.hits, cx))
                 .collect();
-            (Group { title: None, rows }, "No matching files")
+            (
+                Group { title: None, rows },
+                i18n::text(cx, "palette.open.empty", &[]),
+            )
         };
         Palette {
             id: self.id,
             input,
             groups: vec![group],
             start: 0,
-            empty: empty.into(),
+            empty,
             on_pick: self.on_open,
             on_close: self.on_close,
         }
@@ -336,10 +344,12 @@ impl QuickSwitcher {
 
 impl RenderOnce for QuickSwitcher {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
-        let input = query_field(&self.id, "Switch to", window, cx);
+        let placeholder = i18n::text(cx, "palette.switch.placeholder", &[]);
+        let input = query_field(&self.id, placeholder, window, cx);
         let query = input.read(cx).text().trim().to_string();
         let row = |item: &Choice, hits: Vec<Range<usize>>| Row {
             value: item.value.clone(),
+            name: item.label.clone(),
             icon: item.icon,
             label: marked(item.label.clone(), hits, cx),
             detail: None,
@@ -367,7 +377,7 @@ impl RenderOnce for QuickSwitcher {
             input,
             groups: vec![Group { title: None, rows }],
             start,
-            empty: "Nothing open by that name".into(),
+            empty: i18n::text(cx, "palette.switch.empty", &[]),
             on_pick: self.on_switch,
             on_close: self.on_close,
         }
@@ -424,7 +434,8 @@ impl SearchPalette {
     }
 
     pub(crate) fn palette(self, window: &mut Window, cx: &mut App) -> Palette {
-        let input = query_field(&self.id, "Search everything", window, cx);
+        let placeholder = i18n::text(cx, "palette.search.placeholder", &[]);
+        let input = query_field(&self.id, placeholder, window, cx);
         let query = input.read(cx).text().trim().to_string();
         let groups = (self.search)(&query)
             .into_iter()
@@ -441,7 +452,8 @@ impl SearchPalette {
                         );
                     })
                     .map(|result| Row {
-                        value: result.value,
+                        value: result.value.clone(),
+                        name: result.label.clone(),
                         icon: result.icon,
                         label: Highlight::matching(result.label, &query).into_any_element(),
                         detail: result
@@ -458,9 +470,9 @@ impl SearchPalette {
             groups,
             start: 0,
             empty: if query.is_empty() {
-                "Type to search".into()
+                i18n::text(cx, "palette.search.idle", &[])
             } else {
-                format!("Nothing found for “{query}”").into()
+                i18n::text(cx, "palette.search.empty", &[("query", &query)])
             },
             on_pick: self.on_open,
             on_close: self.on_close,

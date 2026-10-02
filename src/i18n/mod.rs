@@ -1,3 +1,4 @@
+mod builtin;
 mod locale;
 mod skip;
 #[cfg(test)]
@@ -73,6 +74,14 @@ impl I18n {
         cx.refresh_windows();
     }
 
+    /// The locale's own message for `key`, nothing when its catalog lacks it.
+    pub(crate) fn find(&self, key: &str) -> Option<&'static str> {
+        self.catalogs
+            .iter()
+            .find(|(tag, _)| *tag == self.locale.tag)
+            .and_then(|(_, catalog)| catalog.get(key).copied())
+    }
+
     /// The shown locale's message for `key`, each `{name}` filled from `args`; fails on a missing key or argument. gpui sets no paragraph direction, so a right-to-left message leads with a right-to-left mark: CoreText would lay out one that starts with Latin letters or a signed number left to right.
     pub fn text(&self, key: &str, args: &[(&str, &str)]) -> SharedString {
         let (_, catalog) = self
@@ -89,6 +98,24 @@ impl I18n {
             Direction::Ltr => text.into(),
             Direction::Rtl => format!("\u{200f}{text}").into(),
         }
+    }
+}
+
+/// A component's message: the app's catalog first, Ely's builtin copy after. Without an `I18n` global it reads the English builtin.
+pub fn text(cx: &App, key: &str, args: &[(&str, &str)]) -> SharedString {
+    let (message, direction) = if cx.has_global::<I18n>() {
+        let i18n = cx.global::<I18n>();
+        let message = i18n
+            .find(key)
+            .unwrap_or_else(|| builtin::builtin(i18n.locale().tag, key));
+        (message, i18n.locale().direction)
+    } else {
+        (builtin::builtin("en-US", key), Direction::Ltr)
+    };
+    let text = fill(message, args).unwrap_or_else(|error| panic!("{key:?}: {error}"));
+    match direction {
+        Direction::Ltr => text.into(),
+        Direction::Rtl => format!("\u{200f}{text}").into(),
     }
 }
 

@@ -5,6 +5,7 @@ use gpui::{
 };
 
 use crate::{
+    i18n,
     navigation::{Group, Palette, Row, fuzzy, marked, query_field},
     primitives::IconName,
     theme::ActiveTheme,
@@ -57,7 +58,12 @@ impl CommandHistory {
 
 impl RenderOnce for CommandHistory {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
-        let input = query_field(&self.id, "Search past commands", window, cx);
+        let input = query_field(
+            &self.id,
+            i18n::text(cx, "palette.history.placeholder", &[]),
+            window,
+            cx,
+        );
         let query = input.read(cx).text().trim().to_string();
         let colors = cx.theme().colors.clone();
         let mut found: Vec<(i32, Row)> = self
@@ -79,6 +85,7 @@ impl RenderOnce for CommandHistory {
                     score,
                     Row {
                         value: past.command.clone(),
+                        name: past.command.clone(),
                         icon: Some(icon),
                         label: marked(past.command.clone(), hits, cx),
                         detail: Some(
@@ -108,7 +115,7 @@ impl RenderOnce for CommandHistory {
                 rows: found.into_iter().map(|(_, row)| row).collect(),
             }],
             start: 0,
-            empty: "No past command fits".into(),
+            empty: i18n::text(cx, "palette.history.empty", &[]),
             on_pick: self.on_pick,
             on_close: self.on_close,
         }

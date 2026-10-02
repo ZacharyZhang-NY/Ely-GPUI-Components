@@ -1,6 +1,6 @@
 use gpui::{
-    App, ClickEvent, ElementId, IntoElement, MouseButton, RenderOnce, SharedString, Window, div,
-    prelude::*,
+    App, ClickEvent, ElementId, IntoElement, MouseButton, RenderOnce, Role, SharedString, Window,
+    div, prelude::*,
 };
 
 use super::button::{ButtonVariant, ClickHandler, label_size, tone};
@@ -70,9 +70,15 @@ impl RenderOnce for IconButton {
         let tone = tone(self.variant, &theme.colors);
         let (_, icon_size) = label_size(self.size);
         let side = theme.control_height(self.size);
+        let name: SharedString = self
+            .tooltip
+            .clone()
+            .unwrap_or_else(|| self.icon.name().into());
 
         div()
             .id(self.id)
+            .role(Role::Button)
+            .aria_label(name)
             .flex()
             .flex_none()
             .items_center()
