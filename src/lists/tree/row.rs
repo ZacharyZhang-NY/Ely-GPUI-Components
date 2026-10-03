@@ -48,14 +48,14 @@ pub(super) fn draw(
 }
 
 /// A faint line down each level a row sits under.
-fn guides(depth: usize, cx: &App) -> impl IntoElement {
+fn guides(name: &str, depth: usize, cx: &App) -> impl IntoElement {
     let theme = cx.theme();
     div()
         .absolute()
         .inset_0()
         .px_2()
         .flex()
-        .children((0..depth).map(|_| {
+        .children((0..depth).map(|level| {
             div()
                 .flex_none()
                 .w(theme.tree_indent())
@@ -64,6 +64,7 @@ fn guides(depth: usize, cx: &App) -> impl IntoElement {
                 .justify_center()
                 .child(
                     div()
+                        .debug_selector(|| format!("tree-guide-{name}-{level}"))
                         .h_full()
                         .border_l_1()
                         .border_color(theme.colors.border),
@@ -121,8 +122,10 @@ fn row(rows: &Rows, ix: usize, window: &mut Window, cx: &mut App) -> AnyElement 
     );
     let (dropped_on, dragged_over, shut) = (key.clone(), key.clone(), key.clone());
     let chevron = div()
+        .debug_selector(|| format!("tree-chevron-{key}"))
         .flex_none()
         .w(indent)
+        .ml(indent * item.depth as f32)
         .flex()
         .justify_center()
         .when(opens, |slot| {
@@ -176,12 +179,6 @@ fn row(rows: &Rows, ix: usize, window: &mut Window, cx: &mut App) -> AnyElement 
         .gap_1()
         .px_2()
         .rounded(theme.radius(Radius::Sm))
-        .border_1()
-        .border_color(if rows.current == Some(ix) {
-            colors.focus
-        } else {
-            gpui::transparent_black()
-        })
         .text_size(theme.text_size(TextSize::Sm))
         .text_color(colors.fg)
         .when(selected, |row| row.bg(colors.active))
@@ -189,8 +186,7 @@ fn row(rows: &Rows, ix: usize, window: &mut Window, cx: &mut App) -> AnyElement 
         .when(landing == Some(DropAt::Inside), |row| {
             row.bg(colors.selection)
         })
-        .child(guides(item.depth, cx))
-        .child(div().flex_none().w(indent * item.depth as f32))
+        .child(guides(&key, item.depth, cx))
         .child(chevron)
         .children(
             checked
@@ -218,6 +214,16 @@ fn row(rows: &Rows, ix: usize, window: &mut Window, cx: &mut App) -> AnyElement 
                 .child(Ellipsis::new(note))
         }))
         .children(landing.filter(|at| *at != DropAt::Inside).map(line))
+        .when(rows.current == Some(ix), |row| {
+            row.child(
+                div()
+                    .absolute()
+                    .inset_0()
+                    .rounded(theme.radius(Radius::Sm))
+                    .border_1()
+                    .border_color(colors.focus),
+            )
+        })
         .on_click(move |event, window, cx| {
             window.focus(&focus, cx);
             if event.click_count() == 2 {
@@ -289,7 +295,7 @@ fn waiting(rows: &Rows, ix: usize, depth: usize, cx: &App) -> AnyElement {
         .flex()
         .items_center()
         .px_2()
-        .child(guides(depth, cx))
+        .child(guides(&format!("waiting-{ix}"), depth, cx))
         .child(
             div()
                 .flex_none()

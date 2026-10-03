@@ -347,3 +347,5 @@
 | T48m | 1 | FAIL | the every-guide test never checked the title |
 | T48m | 2 | FAIL | the in-place link test used a hash link, which survives without preventDefault |
 | T48m | 3 | PASS | |
+| G1 | 1 | PASS | PR #1 merged; CodeRabbit's opt-out declined: Launch is argv |
+| G2 | 1 | PASS | |

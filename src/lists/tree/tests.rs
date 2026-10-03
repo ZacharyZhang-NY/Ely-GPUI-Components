@@ -220,3 +220,23 @@ fn a_drop_in_a_folders_middle_moves_the_node_inside(cx: &mut TestAppContext) {
         [format!("move readme {:?} ui", DropAt::Inside)]
     );
 }
+
+#[gpui::test]
+fn guides_run_unbroken_under_the_parents_chevron(cx: &mut TestAppContext) {
+    let (_, cx) = explorer(false, cx);
+    let bounds = |name: &'static str, cx: &mut VisualTestContext| {
+        cx.debug_bounds(name).unwrap_or_else(|| panic!("no {name}"))
+    };
+    let chevron = bounds("tree-chevron-src", cx);
+    let (lib, ui) = (
+        bounds("tree-guide-lib-0", cx),
+        bounds("tree-guide-ui-0", cx),
+    );
+    assert_eq!(
+        lib.center().x,
+        chevron.center().x,
+        "the guide falls from the chevron's middle"
+    );
+    assert_eq!(lib.bottom(), ui.top(), "one row's guide meets the next");
+    assert_eq!(lib.size.height, px(28.0), "a guide takes its row's height");
+}
