@@ -349,3 +349,5 @@
 | T48m | 3 | PASS | |
 | G1 | 1 | PASS | PR #1 merged; CodeRabbit's opt-out declined: Launch is argv |
 | G2 | 1 | PASS | |
+| G3 | 1 | FAIL | RangeSlider thumbs reported the whole track, not the bounds the other thumb leaves |
+| G3 | 2 | PASS | |

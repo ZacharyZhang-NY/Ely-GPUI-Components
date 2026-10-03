@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use gpui::{
     Animation, AnimationExt, AnyElement, App, ElementId, FocusHandle, InteractiveElement,
-    IntoElement, MouseButton, ParentElement, RenderOnce, SharedString, StatefulInteractiveElement,
-    Styled, Window, div, prelude::*,
+    IntoElement, MouseButton, ParentElement, RenderOnce, Role, SharedString,
+    StatefulInteractiveElement, Styled, Window, div, prelude::*,
 };
 
 use super::{
@@ -11,7 +11,7 @@ use super::{
     options::{OnValue, Run, step},
 };
 use crate::{
-    motion,
+    i18n, motion,
     primitives::tab_stop,
     theme::{ActiveTheme, TextSize},
 };
@@ -127,6 +127,12 @@ impl RenderOnce for Radio {
         };
         div()
             .id(self.id)
+            .role(Role::RadioButton)
+            .aria_toggled(on.into())
+            .when_some(self.label.clone(), |row, label| row.aria_label(label))
+            .when(self.disabled, |row| {
+                row.aria_description(i18n::text(cx, "state.unavailable", &[]))
+            })
             .track_focus(&focus)
             .flex()
             .items_center()
@@ -242,6 +248,7 @@ impl RenderOnce for RadioGroup {
             .collect();
         div()
             .id(self.id)
+            .role(Role::RadioGroup)
             .flex()
             .when(self.horizontal, |group| group.flex_row().gap_4())
             .when(!self.horizontal, |group| group.flex_col().gap_2())

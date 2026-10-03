@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use gpui::{
     App, Bounds, Div, ElementId, Entity, FocusHandle, InteractiveElement, IntoElement,
-    KeyDownEvent, MouseButton, ParentElement, Pixels, RenderOnce, ScrollHandle, SharedString,
+    KeyDownEvent, MouseButton, ParentElement, Pixels, RenderOnce, Role, ScrollHandle, SharedString,
     Stateful, Styled, Window, canvas, div, prelude::*,
 };
 
@@ -13,6 +13,7 @@ use super::{
 };
 use crate::{
     data_display::Avatar,
+    i18n,
     primitives::{Icon, IconName, tab_stop},
     theme::{ActiveTheme, AvatarSize, ControlSize, IconSize, Radius},
     typography::Ellipsis,
@@ -197,6 +198,7 @@ pub(crate) fn listing(
         pick.clone(),
     );
     trigger
+        .aria_expanded(open)
         .on_mouse_down(MouseButton::Left, move |_, _, cx| {
             Picker::show(&toggle, !open, start, cx)
         })
@@ -325,6 +327,14 @@ impl RenderOnce for Select {
             window,
             cx,
         )
+        .role(Role::ComboBox)
+        .aria_placeholder(self.placeholder.clone())
+        .when_some(shown.as_ref(), |trigger, choice| {
+            trigger.aria_value(choice.label.clone())
+        })
+        .when(self.disabled, |trigger| {
+            trigger.aria_description(i18n::text(cx, "state.unavailable", &[]))
+        })
         .when_some(
             shown.as_ref().and_then(|choice| choice.icon),
             |trigger, icon| {

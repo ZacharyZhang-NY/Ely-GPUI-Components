@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use gpui::{
     Animation, AnimationExt, AnyElement, App, ElementId, InteractiveElement, IntoElement,
-    MouseButton, ParentElement, RenderOnce, SharedString, StatefulInteractiveElement, Styled,
-    Window, div, prelude::*,
+    MouseButton, ParentElement, RenderOnce, Role, SharedString, StatefulInteractiveElement, Styled,
+    Toggled, Window, div, prelude::*,
 };
 
 use super::{
@@ -11,7 +11,7 @@ use super::{
     options::{OnFlag, OnValues},
 };
 use crate::{
-    motion,
+    i18n, motion,
     primitives::{Icon, IconName, tab_stop},
     theme::{ActiveTheme, IconSize, Mix, Radius, TextSize},
 };
@@ -152,8 +152,19 @@ impl RenderOnce for Checkbox {
         } else {
             theme.colors.fg
         };
+        let toggled = match self.state {
+            CheckState::Off => Toggled::False,
+            CheckState::On => Toggled::True,
+            CheckState::Mixed => Toggled::Mixed,
+        };
         div()
             .id(self.id)
+            .role(Role::CheckBox)
+            .aria_toggled(toggled)
+            .when_some(self.label.clone(), |row, label| row.aria_label(label))
+            .when(self.disabled, |row| {
+                row.aria_description(i18n::text(cx, "state.unavailable", &[]))
+            })
             .track_focus(&focus)
             .flex()
             .items_center()

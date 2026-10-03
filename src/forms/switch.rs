@@ -2,13 +2,13 @@ use std::rc::Rc;
 
 use gpui::{
     Animation, AnimationExt, App, ElementId, InteractiveElement, IntoElement, MouseButton,
-    ParentElement, RenderOnce, SharedString, StatefulInteractiveElement, Styled, Window, div,
+    ParentElement, RenderOnce, Role, SharedString, StatefulInteractiveElement, Styled, Window, div,
     prelude::*, transparent_black,
 };
 
 use super::options::OnFlag;
 use crate::{
-    motion,
+    i18n, motion,
     primitives::tab_stop,
     theme::{ActiveTheme, Elevation, Mix, TextSize},
 };
@@ -119,6 +119,12 @@ impl RenderOnce for Switch {
         let (id, next, on_change) = (self.id.clone(), !self.on, self.on_change);
         div()
             .id(self.id)
+            .role(Role::Switch)
+            .aria_toggled(self.on.into())
+            .when_some(self.label.clone(), |row, label| row.aria_label(label))
+            .when(self.disabled, |row| {
+                row.aria_description(i18n::text(cx, "state.unavailable", &[]))
+            })
             .track_focus(&focus)
             .flex()
             .items_center()

@@ -2,12 +2,13 @@ use std::rc::Rc;
 
 use gpui::{
     AnyElement, App, Bounds, DragMoveEvent, ElementId, EmptyView, EntityId, InteractiveElement,
-    IntoElement, MouseButton, ParentElement, Pixels, Point, RenderOnce, StatefulInteractiveElement,
-    Styled, Window, canvas, div, prelude::*, relative,
+    IntoElement, MouseButton, Orientation, ParentElement, Pixels, Point, RenderOnce, Role,
+    StatefulInteractiveElement, Styled, Window, canvas, div, prelude::*, relative,
 };
 
 use super::options::OnNumber;
 use crate::{
+    i18n,
     primitives::tab_stop,
     theme::{ActiveTheme, Elevation},
 };
@@ -86,6 +87,13 @@ impl Track {
                 )
             })
             .collect();
+        let unavailable = self
+            .disabled
+            .then(|| i18n::text(cx, "state.unavailable", &[]));
+        let orientation = match vertical {
+            true => Orientation::Vertical,
+            false => Orientation::Horizontal,
+        };
         let theme = cx.theme();
         let colors = &theme.colors;
         let (thumb, line) = (theme.slider_thumb(), theme.slider_track());
@@ -143,8 +151,22 @@ impl Track {
             .map(|(k, at)| {
                 let focused = handles[k].is_focused(window);
                 let (commit, value) = (self.commit.clone(), self.values[k]);
+                let (floor, ceiling) = match (self.values.as_slice(), k) {
+                    ([_, high], 0) => (min, *high),
+                    ([low, _], _) => (*low, max),
+                    _ => (min, max),
+                };
                 div()
                     .id(("thumb", k))
+                    .role(Role::Slider)
+                    .aria_numeric_value(value)
+                    .aria_min_numeric_value(floor)
+                    .aria_max_numeric_value(ceiling)
+                    .aria_numeric_value_step(step)
+                    .aria_orientation(orientation)
+                    .when_some(unavailable.clone(), |thumb, text| {
+                        thumb.aria_description(text)
+                    })
                     .track_focus(&handles[k])
                     .absolute()
                     .size(thumb)
