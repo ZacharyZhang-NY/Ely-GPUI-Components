@@ -108,7 +108,7 @@ impl RenderOnce for SelectableText {
             })
             .on_key_down(move |event, _, cx| {
                 let stroke = &event.keystroke;
-                if !stroke.modifiers.secondary() {
+                if !stroke.modifiers.secondary(cx) {
                     return;
                 }
                 match stroke.key.as_str() {

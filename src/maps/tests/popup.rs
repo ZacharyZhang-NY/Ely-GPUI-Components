@@ -1,6 +1,6 @@
 use gpui::{
     AnyElement, Entity, InteractiveElement, IntoElement, Modifiers, ParentElement, ScrollDelta,
-    ScrollWheelEvent, TestAppContext, TouchPhase, VisualTestContext, div, point, px,
+    ScrollEvent, ScrollSource, TestAppContext, TouchPhase, VisualTestContext, div, point, px,
 };
 
 use super::{Stage, at, focus_map, hear, last, moves, press, said, say, settle, stage, start};
@@ -232,11 +232,12 @@ fn a_tall_card_scrolls_its_body_and_holds_the_map(cx: &mut TestAppContext) {
         before.top() > px(300.0),
         "the card stops inside the map: {before:?}"
     );
-    cx.simulate_event(ScrollWheelEvent {
+    cx.simulate_event(ScrollEvent {
         position: point(px(200.0), px(250.0)),
         delta: ScrollDelta::Pixels(point(px(0.0), px(-60.0))),
         modifiers: Modifiers::none(),
         touch_phase: TouchPhase::Moved,
+        source: ScrollSource::Pointer,
     });
     settle(cx);
     let after = cx.debug_bounds("last-line").expect("the last line");

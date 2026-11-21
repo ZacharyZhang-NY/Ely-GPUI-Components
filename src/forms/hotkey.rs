@@ -84,8 +84,8 @@ impl RenderOnce for HotkeyInput {
                 };
                 log::info!(
                     "hotkey input: {}",
-                    next.as_ref()
-                        .map_or("cleared".into(), |stroke| stroke.unparse())
+                    next.as_ref().map_or("cleared".into(), |stroke| stroke
+                        .unparse(cx.platform_info().os))
                 );
                 window.blur(cx);
                 if let Some(on_change) = &on_change {
@@ -98,7 +98,9 @@ impl RenderOnce for HotkeyInput {
                         .text_color(colors.fg_subtle)
                         .child("Press a shortcut…"),
                 ),
-                (Some(stroke), false) => field.child(KbdCombo::new(&stroke.unparse())),
+                (Some(stroke), false) => {
+                    field.child(KbdCombo::new(&stroke.unparse(cx.platform_info().os)))
+                }
                 (None, false) => field.child(div().text_color(colors.fg_subtle).child("None")),
             })
             .child(

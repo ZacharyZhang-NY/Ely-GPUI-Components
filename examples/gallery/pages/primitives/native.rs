@@ -425,7 +425,9 @@ pub fn keyboard(window: &mut Window, cx: &mut App) -> impl IntoElement + use<> {
                     .focus_ring(cx)
                     .child(shown)
                     .on_key_down(move |event, _, cx| {
-                        let stroke = SharedString::from(event.keystroke.to_string());
+                        let stroke = SharedString::from(
+                            event.keystroke.display(cx.platform_info().os).to_string(),
+                        );
                         last.update(cx, |last, cx| {
                             *last = stroke;
                             cx.notify();

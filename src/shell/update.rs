@@ -124,7 +124,11 @@ impl RenderOnce for UpdateBanner {
             UpdateState::Available => text(cx, "update.available", &[("version", version)]),
             UpdateState::Downloading(value) => {
                 let percent = (value * 100.0).round().to_string();
-                text(cx, "update.downloading", &[("version", version), ("percent", &percent)])
+                text(
+                    cx,
+                    "update.downloading",
+                    &[("version", version), ("percent", &percent)],
+                )
             }
             UpdateState::Ready => text(cx, "update.ready", &[("version", version)]),
         };
@@ -220,7 +224,10 @@ impl UpdateDialog {
 
 impl RenderOnce for UpdateDialog {
     fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
-        let args = [("name", self.name.as_ref()), ("version", self.version.as_ref())];
+        let args = [
+            ("name", self.name.as_ref()),
+            ("version", self.version.as_ref()),
+        ];
         let headline = match self.state {
             UpdateState::Ready => text(cx, "update.headline.ready", &args),
             _ => text(cx, "update.headline.available", &args),

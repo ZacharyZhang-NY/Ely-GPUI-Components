@@ -212,7 +212,7 @@ fn a_slow_composition_undoes_in_one_step(cx: &mut TestAppContext) {
         editor.update_in(cx, |editor, window, cx| {
             editor.replace_and_mark_text_in_range(None, pinyin, None, window, cx)
         });
-        std::thread::sleep(Duration::from_millis(950));
+        cx.executor().advance_clock(Duration::from_millis(950));
     }
     editor.update_in(cx, |editor, window, cx| {
         editor.replace_text_in_range(None, "你", window, cx);

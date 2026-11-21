@@ -2,8 +2,8 @@ use std::time::Duration;
 
 use gpui::{
     Context, Entity, IntoElement, Modifiers, MouseButton, ParentElement, Render, ScrollDelta,
-    ScrollWheelEvent, SharedString, Styled, TestAppContext, TouchPhase, VisualTestContext, Window,
-    div, point, px,
+    ScrollEvent, ScrollSource, SharedString, Styled, TestAppContext, TouchPhase, VisualTestContext,
+    Window, div, point, px,
 };
 use web_time::Instant;
 
@@ -281,7 +281,7 @@ fn command_scroll_brings_it_nearer_and_a_plain_scroll_passes(cx: &mut TestAppCon
         .debug_bounds("model-viewer")
         .expect("the viewer draws")
         .center();
-    let wheel = |platform: bool| ScrollWheelEvent {
+    let wheel = |platform: bool| ScrollEvent {
         position: middle,
         delta: ScrollDelta::Pixels(point(px(0.0), px(-50.0))),
         modifiers: Modifiers {
@@ -289,6 +289,7 @@ fn command_scroll_brings_it_nearer_and_a_plain_scroll_passes(cx: &mut TestAppCon
             ..Modifiers::none()
         },
         touch_phase: TouchPhase::Moved,
+        source: ScrollSource::Pointer,
     };
     cx.simulate_event(wheel(false));
     settle(cx);

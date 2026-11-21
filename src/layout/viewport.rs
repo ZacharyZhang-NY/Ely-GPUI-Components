@@ -102,10 +102,10 @@ impl RenderOnce for Viewport {
             .relative()
             .size_full()
             .overflow_hidden()
-            .on_scroll_wheel(move |event, window, cx| {
+            .on_scroll(move |event, window, cx| {
                 let delta = event.delta.pixel_delta(window.line_height());
                 wheel.update(cx, |view, cx| {
-                    view.transform = if event.modifiers.secondary() || event.modifiers.control {
+                    view.transform = if event.modifiers.secondary(cx) || event.modifiers.control {
                         let anchor = event.position - view.bounds.origin;
                         let factor = (-f32::from(delta.y) * 0.01).exp();
                         view.transform.zoom_at(anchor, factor, range)

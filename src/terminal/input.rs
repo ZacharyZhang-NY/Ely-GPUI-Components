@@ -9,7 +9,7 @@ use alacritty_terminal::{
 use gpui::{
     App, Bounds, ClipboardItem, Context, EntityInputHandler, InteractiveElement, KeyBinding,
     KeyDownEvent, ModifiersChangedEvent, MouseButton, MouseDownEvent, MouseMoveEvent, Pixels,
-    Point, ScrollWheelEvent, UTF16Selection, Window, actions,
+    Point, ScrollEvent, UTF16Selection, Window, actions,
 };
 
 use super::{
@@ -79,7 +79,7 @@ pub(crate) fn listen<E: InteractiveElement>(root: E, cx: &mut Context<Terminal>)
             MouseButton::Left,
             cx.listener(|terminal, _, _, _| terminal.selecting = false),
         )
-        .on_scroll_wheel(cx.listener(Terminal::wheel))
+        .on_scroll(cx.listener(Terminal::wheel))
         .on_modifiers_changed(
             cx.listener(|terminal, event: &ModifiersChangedEvent, _, cx| {
                 if !event.modifiers.platform && terminal.hovered.take().is_some() {
@@ -212,7 +212,7 @@ impl Terminal {
         }
     }
 
-    fn wheel(&mut self, event: &ScrollWheelEvent, _: &mut Window, cx: &mut Context<Self>) {
+    fn wheel(&mut self, event: &ScrollEvent, _: &mut Window, cx: &mut Context<Self>) {
         cx.stop_propagation();
         self.rest += event.delta.pixel_delta(self.cell.height).y;
         let lines = (self.rest / self.cell.height).trunc() as i32;

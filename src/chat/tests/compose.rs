@@ -94,7 +94,8 @@ fn numbered(disabled: &[usize]) -> Vec<Choice> {
 /// Frames 2ms apart, past reduced motion's 1ms entrances.
 fn frames(cx: &mut VisualTestContext) {
     for _ in 0..3 {
-        std::thread::sleep(std::time::Duration::from_millis(2));
+        cx.executor()
+            .advance_clock(std::time::Duration::from_millis(2));
         cx.update(|window, _| window.refresh());
         cx.run_until_parked();
     }

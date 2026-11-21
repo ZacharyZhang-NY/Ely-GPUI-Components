@@ -329,7 +329,7 @@ impl RenderOnce for ScrollArea {
                     })
                     .when(!self.vertical, |body| body.overflow_scroll())
                     .track_scroll(&handle)
-                    .on_scroll_wheel({
+                    .on_scroll({
                         let handle = handle.clone();
                         move |event, window, cx| {
                             let delta = event.delta.pixel_delta(window.line_height());

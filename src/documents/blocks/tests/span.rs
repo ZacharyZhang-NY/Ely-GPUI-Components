@@ -12,7 +12,8 @@ fn three(cx: &mut TestAppContext) -> (Entity<BlockEditor>, &mut VisualTestContex
     let blocks = vec![paragraph("alpha"), paragraph("beta"), paragraph("gamma")];
     let (editor, cx) = open(blocks, cx);
     cx.update(|_, cx| Theme::update(cx, |theme| theme.reduced_motion = true));
-    std::thread::sleep(std::time::Duration::from_millis(5));
+    cx.executor()
+        .advance_clock(std::time::Duration::from_millis(5));
     settle(cx);
     (editor, cx)
 }

@@ -13,7 +13,7 @@ Rules: the work order follows dependencies, since the PRD has no chapter for it.
 
 ## Items
 
-- [x] K01 gpui from `gpui-pre =0.3.8`, Kit's pin: crate, gallery, web build, docs, CI
+- [x] K01 gpui from `gpui-pre =0.3.12`, Kit's pin: crate, gallery, web build, docs, CI
 - [x] K02 Tab and Shift-Tab bound under `FocusScope`'s own context, so a deeper context's Tab wins whatever the order of `init`
 - [x] K03 Assets: `init` checks every embedded file through the app's source; one source serves Ely's files and another's
 - [x] K04 `compat/kit`: a crate on the newest Kit that runs both libraries in one window, in `scripts/check.sh` and CI

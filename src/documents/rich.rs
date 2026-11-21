@@ -1,8 +1,9 @@
 use std::rc::Rc;
 
 use gpui::{
-    AnyElement, App, ElementId, Entity, InteractiveElement, IntoElement, KeyBinding, ParentElement,
-    RenderOnce, SharedString, Styled, Window, actions, div, prelude::*,
+    Action, AnyElement, App, ElementId, Entity, InteractiveElement, IntoElement, KeyBinding,
+    KeyBindingContextPredicate, ParentElement, RenderOnce, SharedString, Styled, Window, actions,
+    div, prelude::*,
 };
 
 use super::{
@@ -20,14 +21,21 @@ use crate::{
 
 actions!(ely_rich_text, [ToggleBold, ToggleItalic, EditLink]);
 
+fn binding<A: Action>(cx: &App, strokes: &str, action: A, context: Option<&str>) -> KeyBinding {
+    let predicate =
+        context.map(|c| Rc::new(KeyBindingContextPredicate::parse(c).expect("context")));
+    KeyBinding::load(strokes, Box::new(action), predicate, false, None, cx)
+        .unwrap_or_else(|error| panic!("bad keystroke {strokes:?}: {error}"))
+}
+
 const CONTEXT: &str = "ElyRichText";
 
 /// Binds the rich text keys. `init` calls it.
 pub(crate) fn bind_keys(cx: &mut App) {
     cx.bind_keys([
-        KeyBinding::new("secondary-b", ToggleBold, Some(CONTEXT)),
-        KeyBinding::new("secondary-i", ToggleItalic, Some(CONTEXT)),
-        KeyBinding::new("secondary-k", EditLink, Some(CONTEXT)),
+        binding(cx, "secondary-b", ToggleBold, Some(CONTEXT)),
+        binding(cx, "secondary-i", ToggleItalic, Some(CONTEXT)),
+        binding(cx, "secondary-k", EditLink, Some(CONTEXT)),
     ]);
 }
 

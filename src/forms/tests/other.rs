@@ -115,7 +115,7 @@ impl Render for Titled {
 }
 
 /// Presses and releases `key`, a drawn frame between.
-fn release(key: &str, cx: &mut VisualTestContext) {
+fn release(key: &'static str, cx: &mut VisualTestContext) {
     let redraw = |cx: &mut VisualTestContext| {
         cx.run_until_parked();
         cx.update(|window, _| window.refresh());
@@ -124,7 +124,8 @@ fn release(key: &str, cx: &mut VisualTestContext) {
     cx.simulate_keystrokes(key);
     redraw(cx);
     cx.simulate_event(KeyUpEvent {
-        keystroke: Keystroke::parse(key).expect("a key"),
+        keystroke: Keystroke::parse_with_os(key, cx.read(|app| app.platform_info().os))
+            .expect("a key"),
     });
     redraw(cx);
 }

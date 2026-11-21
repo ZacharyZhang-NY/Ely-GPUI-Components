@@ -69,11 +69,12 @@ fn settle(cx: &mut VisualTestContext) {
 }
 
 /// Presses a key with no refresh of its own, so only what notifies redraws.
-fn press(key: &str, cx: &mut VisualTestContext) {
+fn press(key: &'static str, cx: &mut VisualTestContext) {
     cx.simulate_keystrokes(key);
     cx.run_until_parked();
     cx.simulate_event(KeyUpEvent {
-        keystroke: Keystroke::parse(key).expect("a key"),
+        keystroke: Keystroke::parse_with_os(key, cx.read(|app| app.platform_info().os))
+            .expect("a key"),
     });
     cx.run_until_parked();
 }

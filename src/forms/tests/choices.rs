@@ -29,9 +29,9 @@ struct Radios {
     chosen: SharedString,
 }
 
-fn release(key: &str, cx: &mut VisualTestContext) {
+fn release(key: &'static str, cx: &mut VisualTestContext) {
     cx.simulate_event(KeyUpEvent {
-        keystroke: Keystroke::parse(key).unwrap(),
+        keystroke: Keystroke::parse_with_os(key, cx.read(|app| app.platform_info().os)).unwrap(),
     });
 }
 
@@ -187,7 +187,8 @@ fn a_long_multi_select_opens_with_its_first_choice_in_view(cx: &mut TestAppConte
 /// Frames 2ms apart, past reduced motion's 1ms entrances.
 fn frames(cx: &mut VisualTestContext) {
     for _ in 0..3 {
-        std::thread::sleep(std::time::Duration::from_millis(2));
+        cx.executor()
+            .advance_clock(std::time::Duration::from_millis(2));
         cx.update(|window, _| window.refresh());
         cx.run_until_parked();
     }

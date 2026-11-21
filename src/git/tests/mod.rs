@@ -146,11 +146,12 @@ fn changed_lines_and_hunks_answer_presses(cx: &mut TestAppContext) {
     let (view, cx) = cx.add_window_view(|_, _| Picking::default());
     cx.update(|window, _| window.activate_window());
     settle(cx);
-    let press = |cx: &mut VisualTestContext, key: &str| {
+    let press = |cx: &mut VisualTestContext, key: &'static str| {
         cx.simulate_keystrokes(key);
         settle(cx);
         cx.simulate_event(KeyUpEvent {
-            keystroke: Keystroke::parse(key).expect("a key"),
+            keystroke: Keystroke::parse_with_os(key, cx.read(|app| app.platform_info().os))
+                .expect("a key"),
         });
         settle(cx);
     };

@@ -336,7 +336,7 @@ impl RenderOnce for ImageViewer {
             .child(body)
             .when_some(pixels, |stage, pixels| {
                 stage
-                    .on_scroll_wheel(move |event, window, cx| {
+                    .on_scroll(move |event, window, cx| {
                         let delta = event.delta.pixel_delta(window.line_height());
                         let zooming = event.modifiers.platform || event.modifiers.control;
                         wheel.update(cx, |view, cx| {

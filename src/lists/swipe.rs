@@ -161,7 +161,7 @@ impl RenderOnce for SwipeableListItem {
             .id(self.id.clone())
             .relative()
             .overflow_hidden()
-            .on_scroll_wheel(move |event, _, cx| {
+            .on_scroll(move |event, _, cx| {
                 let ScrollDelta::Pixels(delta) = event.delta else {
                     return;
                 };

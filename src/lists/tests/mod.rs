@@ -5,8 +5,8 @@ use std::{
 
 use gpui::{
     Context, Entity, InteractiveElement, IntoElement, Modifiers, ParentElement, Pixels, Point,
-    Render, ScrollDelta, ScrollWheelEvent, SharedString, StatefulInteractiveElement, Styled,
-    TestAppContext, TouchPhase, VisualTestContext, Window, div, point, px,
+    Render, ScrollDelta, ScrollEvent, ScrollSource, SharedString, StatefulInteractiveElement,
+    Styled, TestAppContext, TouchPhase, VisualTestContext, Window, div, point, px,
 };
 
 use super::{
@@ -30,7 +30,8 @@ fn setup(cx: &mut TestAppContext) {
 /// Frames 2ms apart, past reduced motion's 1ms glides.
 fn settle(cx: &mut VisualTestContext) {
     for _ in 0..3 {
-        std::thread::sleep(std::time::Duration::from_millis(2));
+        cx.executor()
+            .advance_clock(std::time::Duration::from_millis(2));
         cx.update(|window, _| window.refresh());
         cx.run_until_parked();
     }
@@ -183,11 +184,12 @@ impl Render for Swiped {
 }
 
 fn scroll(cx: &mut VisualTestContext, phase: TouchPhase, x: f32, y: f32) {
-    cx.simulate_event(ScrollWheelEvent {
+    cx.simulate_event(ScrollEvent {
         position: point(px(160.0), px(20.0)),
         delta: ScrollDelta::Pixels(point(px(x), px(y))),
         modifiers: Modifiers::none(),
         touch_phase: phase,
+        source: ScrollSource::Touch,
     });
     settle(cx);
 }

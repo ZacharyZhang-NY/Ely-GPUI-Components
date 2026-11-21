@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use gpui::{
     App, Bounds, ElementId, Entity, FontWeight, Hsla, InteractiveElement, IntoElement, MouseButton,
-    ParentElement, Pixels, RenderOnce, ScrollWheelEvent, SharedString, StatefulInteractiveElement,
+    ParentElement, Pixels, RenderOnce, ScrollEvent, SharedString, StatefulInteractiveElement,
     Styled, Window, div, prelude::*, relative,
 };
 
@@ -178,7 +178,7 @@ impl RenderOnce for TimelineProfiler {
                     .flex()
                     .flex_col()
                     .gap_px()
-                    .on_scroll_wheel(move |event: &ScrollWheelEvent, window, cx| {
+                    .on_scroll(move |event: &ScrollEvent, window, cx| {
                         let Some(on_range) = &on_range else {
                             return;
                         };

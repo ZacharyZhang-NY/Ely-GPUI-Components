@@ -8,10 +8,11 @@ use crate::canvas::{
     Board, Edge, Link, MindMap, Node, NodeGraph, Port, Tool, Topic, Viewport, Whiteboard,
 };
 
-fn tap(key: &str, cx: &mut VisualTestContext) {
+fn tap(key: &'static str, cx: &mut VisualTestContext) {
     cx.simulate_keystrokes(key);
     cx.simulate_event(gpui::KeyUpEvent {
-        keystroke: gpui::Keystroke::parse(key).expect("a key"),
+        keystroke: gpui::Keystroke::parse_with_os(key, cx.read(|app| app.platform_info().os))
+            .expect("a key"),
     });
     settle(cx);
 }

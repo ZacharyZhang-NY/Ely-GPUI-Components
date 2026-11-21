@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use gpui::{
     App, ElementId, Hsla, InteractiveElement, IntoElement, ParentElement, Pixels, RenderOnce,
-    ScrollDelta, ScrollStrategy, ScrollWheelEvent, SharedString, Styled, UniformListScrollHandle,
+    ScrollDelta, ScrollEvent, ScrollStrategy, SharedString, Styled, UniformListScrollHandle,
     Window, div, prelude::*, uniform_list,
 };
 
@@ -257,7 +257,7 @@ impl RenderOnce for LogViewer {
                     .font_family(theme.mono_family.clone())
                     .text_size(theme.text_size(TextSize::Xs))
                     .when_some(release.filter(|_| self.follow), |body, on_follow| {
-                        body.on_scroll_wheel(move |event: &ScrollWheelEvent, window, cx| {
+                        body.on_scroll(move |event: &ScrollEvent, window, cx| {
                             let back = match event.delta {
                                 ScrollDelta::Pixels(delta) => delta.y > Pixels::ZERO,
                                 ScrollDelta::Lines(delta) => delta.y > 0.0,

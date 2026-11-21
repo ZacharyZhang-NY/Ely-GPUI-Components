@@ -28,11 +28,12 @@ fn settle(cx: &mut VisualTestContext) {
 }
 
 /// Presses and releases `key`, with a frame in between as on a real keyboard.
-fn press(key: &str, cx: &mut VisualTestContext) {
+fn press(key: &'static str, cx: &mut VisualTestContext) {
     cx.simulate_keystrokes(key);
     settle(cx);
     cx.simulate_event(KeyUpEvent {
-        keystroke: Keystroke::parse(key).expect("a key"),
+        keystroke: Keystroke::parse_with_os(key, cx.read(|app| app.platform_info().os))
+            .expect("a key"),
     });
     settle(cx);
 }
@@ -275,7 +276,8 @@ fn an_opening_palette_rises_in_the_box_its_scrim_centers(cx: &mut TestAppContext
     let (_, cx) = host(Kind::Commands, cx);
     let top = |cx: &mut VisualTestContext| cx.debug_bounds("palette-card").expect("the card").top();
     let first = top(cx);
-    std::thread::sleep(std::time::Duration::from_millis(250));
+    cx.executor()
+        .advance_clock(std::time::Duration::from_millis(250));
     settle(cx);
     let lift = first - top(cx);
     assert!(

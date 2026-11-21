@@ -34,7 +34,7 @@ fn a_mode_set_at_once_skips_the_fade(cx: &mut TestAppContext) {
         cx.read(|cx| cx.theme().colors.clone()),
         Palette::light(false)
     );
-    std::thread::sleep(Duration::from_millis(2));
+    cx.executor().advance_clock(Duration::from_millis(2));
     cx.executor().advance_clock(Duration::from_millis(100));
     cx.run_until_parked();
     assert!(!cx.read(|cx| cx.theme().is_dark()));

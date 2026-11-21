@@ -18,8 +18,8 @@ anyhow = "1"
 barcoders = { version = "2", default-features = false, features = ["std"] }
 emojis = "0.9"
 futures = "0.3"
-gpui = { package = "gpui-pre", version = "=0.3.8", default-features = false, features = ["stacker"] }
-gpui_platform = { package = "gpui-pre-platform", version = "=0.3.8", features = ["font-kit"] }
+gpui = { package = "gpui-pre", version = "=0.3.12", default-features = false, features = ["stacker"] }
+gpui_platform = { package = "gpui-pre-platform", version = "=0.3.12", features = ["font-kit"] }
 image = { version = "0.25", default-features = false }
 iso_currency = { version = "0.7", features = ["iterator"] }
 isocountry = "0.3"
@@ -61,7 +61,7 @@ rustix = { version = "1", default-features = false, features = ["std", "fs"] }
 env_logger = "0.11"
 
 [target.'cfg(target_family = "wasm")'.dev-dependencies]
-gpui_web = { package = "gpui-pre-web", version = "=0.3.8" }
+gpui_web = { package = "gpui-pre-web", version = "=0.3.12" }
 js-sys = "0.3"
 wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = ["Location", "UrlSearchParams", "Window"] }

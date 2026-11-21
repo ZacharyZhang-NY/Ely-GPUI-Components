@@ -86,7 +86,7 @@ fn place(host: &Entity<Wall>, key: &str, cx: &mut VisualTestContext) -> (u32, u3
     })
 }
 
-fn press(key: &str, cx: &mut VisualTestContext) {
+fn press(key: &'static str, cx: &mut VisualTestContext) {
     cx.simulate_keystrokes(key);
     settle(cx);
 }
@@ -175,10 +175,11 @@ fn tab(stops: usize, cx: &mut VisualTestContext) {
     settle(cx);
 }
 
-fn tap(key: &str, cx: &mut VisualTestContext) {
+fn tap(key: &'static str, cx: &mut VisualTestContext) {
     cx.simulate_keystrokes(key);
     cx.simulate_event(gpui::KeyUpEvent {
-        keystroke: gpui::Keystroke::parse(key).expect("a key"),
+        keystroke: gpui::Keystroke::parse_with_os(key, cx.read(|app| app.platform_info().os))
+            .expect("a key"),
     });
     settle(cx);
 }

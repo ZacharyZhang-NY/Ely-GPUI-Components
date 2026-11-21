@@ -76,11 +76,12 @@ fn tab_to(nth: usize, cx: &mut VisualTestContext) {
     settle(cx);
 }
 
-fn press(key: &str, cx: &mut VisualTestContext) {
+fn press(key: &'static str, cx: &mut VisualTestContext) {
     cx.simulate_keystrokes(key);
     settle(cx);
     cx.simulate_event(KeyUpEvent {
-        keystroke: Keystroke::parse(key).expect("a key"),
+        keystroke: Keystroke::parse_with_os(key, cx.read(|app| app.platform_info().os))
+            .expect("a key"),
     });
     settle(cx);
 }

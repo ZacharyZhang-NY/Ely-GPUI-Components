@@ -2,8 +2,9 @@ use std::{cell::RefCell, collections::HashSet, f64::consts::LOG2_E, rc::Rc, sync
 
 use gpui::{
     AnyElement, Context, Entity, FocusHandle, ImageSource, IntoElement, KeyUpEvent, Keystroke,
-    Modifiers, MouseButton, ParentElement, Render, RenderImage, ScrollDelta, ScrollWheelEvent,
-    SharedString, Styled, TestAppContext, TouchPhase, VisualTestContext, Window, div, point, px,
+    Modifiers, MouseButton, ParentElement, Render, RenderImage, ScrollDelta, ScrollEvent,
+    ScrollSource, SharedString, Styled, TestAppContext, TouchPhase, VisualTestContext, Window, div,
+    point, px,
 };
 
 use super::{LatLon, MapMarker, MapView, MapViewport, Tile};
@@ -132,11 +133,12 @@ fn window_at((x, y): (f32, f32)) -> gpui::Point<gpui::Pixels> {
     at(x + 1.0, y + 1.0)
 }
 
-fn press(key: &str, cx: &mut VisualTestContext) {
+fn press(key: &'static str, cx: &mut VisualTestContext) {
     cx.simulate_keystrokes(key);
     settle(cx);
     cx.simulate_event(KeyUpEvent {
-        keystroke: Keystroke::parse(key).expect("a key"),
+        keystroke: Keystroke::parse_with_os(key, cx.read(|app| app.platform_info().os))
+            .expect("a key"),
     });
     settle(cx);
 }
@@ -179,11 +181,12 @@ fn a_drag_pans_the_map_with_the_pointer(cx: &mut TestAppContext) {
 fn command_and_the_wheel_zoom_about_the_pointer(cx: &mut TestAppContext) {
     let (host, cx) = stage(map, cx);
     let place = start().to_geo((300.0, 60.0), SIZE, TILE);
-    cx.simulate_event(ScrollWheelEvent {
+    cx.simulate_event(ScrollEvent {
         position: window_at((300.0, 60.0)),
         delta: ScrollDelta::Pixels(point(px(0.0), px(-240.0))),
         modifiers: Modifiers::command(),
         touch_phase: TouchPhase::Moved,
+        source: ScrollSource::Pointer,
     });
     settle(cx);
     let view = last(&host, cx);
@@ -193,11 +196,12 @@ fn command_and_the_wheel_zoom_about_the_pointer(cx: &mut TestAppContext) {
         view.zoom
     );
     assert!(near(view.to_view(place, SIZE, TILE), (300.0, 60.0)));
-    cx.simulate_event(ScrollWheelEvent {
+    cx.simulate_event(ScrollEvent {
         position: window_at((300.0, 60.0)),
         delta: ScrollDelta::Pixels(point(px(0.0), px(-50.0))),
         modifiers: Modifiers::none(),
         touch_phase: TouchPhase::Moved,
+        source: ScrollSource::Pointer,
     });
     settle(cx);
     let panned = last(&host, cx).to_view(place, SIZE, TILE);

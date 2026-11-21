@@ -93,7 +93,7 @@ impl RenderOnce for ScrollSync {
                         .id((id.clone(), format!("pane-{ix}")))
                         .flex_1()
                         .track_scroll(&handle)
-                        .on_scroll_wheel(move |_, _, cx| {
+                        .on_scroll(move |_, _, cx| {
                             if *wheel.read(cx) != Some(ix) {
                                 log::info!("scroll sync: pane {ix} leads");
                                 wheel.update(cx, |lead, _| *lead = Some(ix));

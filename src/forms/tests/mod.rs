@@ -10,7 +10,8 @@ mod upload;
 
 use gpui::{
     AppContext as _, ClipboardItem, Context, Entity, EntityInputHandler, IntoElement, KeyUpEvent,
-    Keystroke, ParentElement, Render, TestAppContext, VisualTestContext, Window, div, px,
+    Keystroke, OperatingSystem, ParentElement, PlatformInfo, PlatformTarget, Render,
+    TestAppContext, VisualTestContext, Window, div, px,
 };
 
 use super::{Input, MaskedInput, NumberInput, PinInput, TextInput, bind_keys};
@@ -465,4 +466,31 @@ fn a_composition_shows_the_caret_as_typing_does(cx: &mut TestAppContext) {
         })
     });
     assert!(caret(cx), "a composition shows it too");
+}
+
+#[gpui::test]
+fn a_secondary_binding_follows_the_runtime_os(cx: &mut TestAppContext) {
+    let (fields, cx) = open(1, false, cx);
+    let field = &fields[0];
+    focus(field, cx);
+    for (os, secondary, other) in [
+        (OperatingSystem::Mac, "cmd-z", "ctrl-z"),
+        (OperatingSystem::Linux, "ctrl-z", "cmd-z"),
+        (OperatingSystem::Windows, "ctrl-z", "cmd-z"), // secondary = Control, like Linux
+    ] {
+        cx.set_platform_info(PlatformInfo {
+            os,
+            target: PlatformTarget::Native,
+        });
+        cx.update(|_, cx| {
+            cx.clear_key_bindings();
+            bind_keys(cx);
+        });
+        field.update(cx, |input, cx| input.set_text("", cx));
+        cx.simulate_input("a");
+        cx.simulate_keystrokes(other);
+        assert_eq!(text(field, cx), "a", "{other} is not undo on {os:?}");
+        cx.simulate_keystrokes(secondary);
+        assert_eq!(text(field, cx), "", "{secondary} is undo on {os:?}");
+    }
 }

@@ -2,18 +2,19 @@ use gpui::Keystroke;
 
 use crate::theme::Platform;
 
+impl From<Platform> for gpui::OperatingSystem {
+    fn from(platform: Platform) -> Self {
+        match platform {
+            Platform::Mac => Self::Mac,
+            Platform::Windows => Self::Windows,
+            Platform::Linux => Self::Linux,
+        }
+    }
+}
+
 /// One keystroke in gpui key syntax, `secondary` read for `platform`: Command on the Mac, Control elsewhere.
 pub fn keystroke(source: &str, platform: Platform) -> Keystroke {
-    let secondary = if platform == Platform::Mac {
-        "cmd"
-    } else {
-        "ctrl"
-    };
-    let spelled: Vec<&str> = source
-        .split('-')
-        .map(|part| if part == "secondary" { secondary } else { part })
-        .collect();
-    Keystroke::parse(&spelled.join("-"))
+    Keystroke::parse_with_os(source, platform.into())
         .unwrap_or_else(|error| panic!("bad keystroke {source:?}: {error}"))
 }
 
@@ -72,7 +73,7 @@ pub fn key_label(key: &str, platform: Platform) -> String {
 mod tests {
     use super::*;
 
-    fn parse(source: &str) -> Keystroke {
+    fn parse(source: &'static str) -> Keystroke {
         Keystroke::parse(source).expect("valid keystroke")
     }
 
@@ -108,5 +109,21 @@ mod tests {
         assert_eq!(key_label("f12", Platform::Mac), "F12");
         assert_eq!(key_label("space", Platform::Windows), "Space");
         assert_eq!(key_label("left", Platform::Linux), "←");
+    }
+
+    #[test]
+    fn a_secondary_keystroke_follows_the_platform_asked_for() {
+        let mac = keystroke("secondary-s", Platform::Mac);
+        assert!(
+            mac.modifiers.platform && !mac.modifiers.control,
+            "⌘S on the Mac"
+        );
+        for platform in [Platform::Windows, Platform::Linux] {
+            let pc = keystroke("secondary-s", platform);
+            assert!(
+                pc.modifiers.control && !pc.modifiers.platform,
+                "Ctrl+S on {platform:?}"
+            );
+        }
     }
 }

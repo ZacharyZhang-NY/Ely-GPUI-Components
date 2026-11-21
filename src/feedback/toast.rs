@@ -128,7 +128,9 @@ impl Toaster {
     /// The titles and severities on show, oldest first.
     pub fn shown(&self) -> Vec<(SharedString, Option<Severity>)> {
         let staying = self.live.iter().filter(|live| !live.leaving);
-        staying.map(|live| (live.toast.title.clone(), live.toast.severity)).collect()
+        staying
+            .map(|live| (live.toast.title.clone(), live.toast.severity))
+            .collect()
     }
 
     /// Sends a toast away: it fades and folds, then leaves the stack.

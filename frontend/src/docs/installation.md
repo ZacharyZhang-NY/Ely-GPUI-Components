@@ -13,8 +13,8 @@ Ely is not on crates.io. Depend on it by git, with GPUI at the snapshot Ely pins
 ```toml
 [dependencies]
 ely-gpui-component = { git = "https://github.com/ZacharyZhang-NY/Ely-GPUI-Components" }
-gpui = { package = "gpui-pre", version = "=0.3.8" }
-gpui_platform = { package = "gpui-pre-platform", version = "=0.3.8", features = ["font-kit"] }
+gpui = { package = "gpui-pre", version = "=0.3.12" }
+gpui_platform = { package = "gpui-pre-platform", version = "=0.3.12", features = ["font-kit"] }
 ```
 
 | Line | Why |
@@ -44,5 +44,5 @@ A window opens with a counter and a Press button. From a clone of the repository
 | `init` error: `ely: the asset source lacks N of Ely's files, first <path>: <reason>` | The app's source cannot load every file Ely bundles. Pass `Assets`, or `Assets::before(yours)` when the app has a source of its own. |
 | `init` error: `ely: embedded fonts failed to register` | GPUI's text system refused Ely's fonts. File a bug with the log. |
 | Windows open with no text on macOS | `gpui_platform` lacks the `font-kit` feature. |
-| `mismatched types`, with the note ``there are multiple different versions of crate `gpui` in the dependency graph`` | `gpui` names another snapshot or a git source. Use `gpui-pre` at `=0.3.8`. |
+| `mismatched types`, with the note ``there are multiple different versions of crate `gpui` in the dependency graph`` | `gpui` names another snapshot or a git source. Use `gpui-pre` at `=0.3.12`. |
 | `metal shader compilation failed` | Default features are off and Xcode's Metal compiler is missing. Keep `runtime_shaders`. |

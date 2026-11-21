@@ -2,7 +2,7 @@ use std::{cell::Cell, rc::Rc};
 
 use gpui::{
     Context, IntoElement, KeyBinding, Modifiers, ParentElement, Pixels, Render, ScrollDelta,
-    ScrollWheelEvent, Styled, TestAppContext, TouchPhase, Window, canvas, div, point, px,
+    ScrollEvent, ScrollSource, Styled, TestAppContext, TouchPhase, Window, canvas, div, point, px,
 };
 
 use super::{press, settle};
@@ -167,11 +167,12 @@ fn a_narrow_strip_scrolls_to_its_last_frame(cx: &mut TestAppContext) {
             .to_pixels(window.rem_size())
     });
     let row = height.get() - px(9.0) - thumb / 2.0;
-    cx.simulate_event(ScrollWheelEvent {
+    cx.simulate_event(ScrollEvent {
         position: point(px(140.0), row),
         delta: ScrollDelta::Pixels(point(px(-2000.0), px(0.0))),
         modifiers: Modifiers::none(),
         touch_phase: TouchPhase::Moved,
+        source: ScrollSource::Pointer,
     });
     settle(cx);
     let last = point(px(280.0 - 24.0), row);

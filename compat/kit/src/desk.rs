@@ -107,6 +107,7 @@ pub fn focused(cx: &mut VisualTestContext, handle: &FocusHandle) -> bool {
 pub fn press(cx: &mut VisualTestContext, key: &str) {
     cx.simulate_keystrokes(key);
     cx.simulate_event(KeyUpEvent {
-        keystroke: Keystroke::parse(key).expect("a key"),
+        keystroke: Keystroke::parse_with_os(key, cx.read(|app| app.platform_info().os))
+            .expect("a key"),
     });
 }

@@ -20,7 +20,7 @@ GPUI's `TestAppContext` serves no assets, so `ely_gpui_component::init` returns 
 | Keys | `simulate_keystrokes("tab enter")` sends key downs alone. GPUI presses a focused element on a key's release, so a test of that dispatches a `KeyUp` as well. |
 | Focus events | GPUI calls focus listeners only while the window is active: call `window.activate_window()`. |
 | Text | Each character takes a fixed advance, unless the context comes from `TestAppContext::build_with_text_system`. Click where layout does not hang on text, such as padding. |
-| Time | Timers run on the executor's clock, which the test advances. Animations run on the wall clock; to see one settled, turn on the theme's reduced motion and wait past its 1 ms. |
+| Time | Timers and animations both run on the executor's clock, which the test advances (`advance_clock`); a wall-clock sleep advances neither. To see an animation settled, turn on the theme's reduced motion and advance past its 1 ms. |
 | Bounds | GPUI clears `debug_bounds` each frame, so a test sees an element leave as well as appear. |
 
 ## Tests to read

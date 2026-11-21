@@ -73,10 +73,11 @@ fn tab(stops: usize, cx: &mut VisualTestContext) {
     settle(cx);
 }
 
-fn tap(key: &str, cx: &mut VisualTestContext) {
+fn tap(key: &'static str, cx: &mut VisualTestContext) {
     cx.simulate_keystrokes(key);
+    let os = cx.read(|app| app.platform_info().os);
     cx.simulate_event(gpui::KeyUpEvent {
-        keystroke: gpui::Keystroke::parse(key).expect("a key"),
+        keystroke: gpui::Keystroke::parse_with_os(key, os).expect("a key"),
     });
     settle(cx);
 }

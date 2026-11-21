@@ -392,7 +392,7 @@ pub(crate) fn grid(face: Face, base: Div, window: &mut Window, cx: &mut App) -> 
                 });
             }
         })
-        .on_scroll_wheel(move |event, _, cx| {
+        .on_scroll(move |event, _, cx| {
             let delta = event.delta.pixel_delta(metrics.tall);
             scrolled.update(cx, |sheet, cx| {
                 let most = point(

@@ -46,6 +46,7 @@ pub async fn play(
     cx: &mut AsyncApp,
 ) -> Result<()> {
     let mut last = point(px(0.0), px(0.0));
+    let os = cx.update(|app| app.platform_info().os);
     for step in steps {
         match *step {
             Step::Rest => park(window, cx)?,
@@ -138,8 +139,8 @@ pub async fn play(
                         }
                         ch => ch.to_string(),
                     };
-                    let stroke =
-                        Keystroke::parse(&key).with_context(|| format!("bad key {key}"))?;
+                    let stroke = Keystroke::parse_with_os(&key, os)
+                        .with_context(|| format!("bad key {key}"))?;
                     press(window.into(), stroke, cx)?;
                     cx.background_executor()
                         .timer(Duration::from_millis(16))

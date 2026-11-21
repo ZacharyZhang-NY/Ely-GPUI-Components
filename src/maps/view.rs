@@ -341,7 +341,7 @@ impl RenderOnce for MapView {
                 cx.stop_propagation();
                 by_key(next, window, cx);
             })
-            .on_scroll_wheel(move |event, window, cx| {
+            .on_scroll(move |event, window, cx| {
                 let delta = event.delta.pixel_delta(window.line_height());
                 let (dx, dy) = (f32::from(delta.x), f32::from(delta.y));
                 if (dx, dy) == (0.0, 0.0) {

@@ -197,7 +197,7 @@ impl RenderOnce for ModelViewer {
                 let next = spun.read(cx).value.turned(by);
                 dragged(next, window, cx)
             })
-            .on_scroll_wheel(move |event, window, cx| {
+            .on_scroll(move |event, window, cx| {
                 if !(event.modifiers.platform || event.modifiers.control) {
                     return;
                 }

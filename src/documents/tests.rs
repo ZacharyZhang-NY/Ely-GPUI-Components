@@ -2,8 +2,8 @@ use std::{cell::RefCell, rc::Rc};
 
 use gpui::{
     AppContext as _, Bounds, Context, Entity, Focusable, IntoElement, Modifiers, ParentElement,
-    Pixels, Point, Render, ScrollDelta, ScrollWheelEvent, Styled, TestAppContext, TouchPhase,
-    VisualTestContext, Window, div, point, px, size,
+    Pixels, Point, Render, ScrollDelta, ScrollEvent, ScrollSource, Styled, TestAppContext,
+    TouchPhase, VisualTestContext, Window, div, point, px, size,
 };
 
 use super::{DocPage, DocumentViewer, PageHit, ZenMode};
@@ -93,11 +93,12 @@ fn on_pages(cx: &mut VisualTestContext) -> Point<Pixels> {
 
 fn wheel(down: f32, cx: &mut VisualTestContext) {
     let at = on_pages(cx);
-    cx.simulate_event(ScrollWheelEvent {
+    cx.simulate_event(ScrollEvent {
         position: at,
         delta: ScrollDelta::Pixels(point(px(0.0), px(-down))),
         modifiers: Modifiers::none(),
         touch_phase: TouchPhase::Moved,
+        source: ScrollSource::Pointer,
     });
     settle(cx);
 }

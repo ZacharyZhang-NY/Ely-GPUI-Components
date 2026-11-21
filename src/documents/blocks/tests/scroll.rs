@@ -1,6 +1,6 @@
 use gpui::{
-    AppContext as _, Entity, Modifiers, ParentElement, Pixels, Render, ScrollDelta, ScrollHandle,
-    ScrollWheelEvent, Styled, TestAppContext, TouchPhase, VisualTestContext, div, point,
+    AppContext as _, Entity, Modifiers, ParentElement, Pixels, Render, ScrollDelta, ScrollEvent,
+    ScrollHandle, ScrollSource, Styled, TestAppContext, TouchPhase, VisualTestContext, div, point,
     prelude::*, px,
 };
 
@@ -51,7 +51,8 @@ fn open(cx: &mut TestAppContext) -> (Entity<BlockEditor>, ScrollHandle, &mut Vis
 /// Settles past reduced motion's 1 ms glides on the wall clock.
 fn still(cx: &mut VisualTestContext) {
     settle(cx);
-    std::thread::sleep(std::time::Duration::from_millis(5));
+    cx.executor()
+        .advance_clock(std::time::Duration::from_millis(5));
     settle(cx);
 }
 
@@ -94,11 +95,12 @@ fn a_wheel_scrolls_the_editor_and_leaves_its_caret(cx: &mut TestAppContext) {
     caret(&editor, 0, 0, cx);
     still(cx);
     let before = shown(&editor, cx);
-    cx.simulate_event(ScrollWheelEvent {
+    cx.simulate_event(ScrollEvent {
         position: point(px(100.0), px(100.0)),
         delta: ScrollDelta::Pixels(point(px(0.0), px(-120.0))),
         modifiers: Modifiers::none(),
         touch_phase: TouchPhase::Moved,
+        source: ScrollSource::Pointer,
     });
     still(cx);
     assert_eq!(

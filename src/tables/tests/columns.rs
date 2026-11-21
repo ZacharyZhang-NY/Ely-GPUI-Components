@@ -63,11 +63,12 @@ fn columns_past_the_table_scroll_sideways_and_a_plain_wheel_leaves_them(cx: &mut
             _ => px(-2000.0),
         };
         for delta in [point(px(0.0), plain), point(px(-2000.0), px(0.0))] {
-            cx.simulate_event(gpui::ScrollWheelEvent {
+            cx.simulate_event(gpui::ScrollEvent {
                 position: cell,
                 delta: gpui::ScrollDelta::Pixels(delta),
                 modifiers: Modifiers::none(),
                 touch_phase: gpui::TouchPhase::Moved,
+                source: gpui::ScrollSource::Pointer,
             });
             settle(cx);
             edit_at(cell, "x", cx);

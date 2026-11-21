@@ -89,7 +89,7 @@ pub(crate) fn paste(text: &str, bracketed: bool) -> Vec<u8> {
 mod tests {
     use super::*;
 
-    fn sent(keys: &str, app_cursor: bool) -> Option<Vec<u8>> {
+    fn sent(keys: &'static str, app_cursor: bool) -> Option<Vec<u8>> {
         bytes(&Keystroke::parse(keys).expect("a keystroke"), app_cursor)
     }
 

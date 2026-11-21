@@ -384,7 +384,7 @@ impl RenderOnce for InfiniteCanvas {
             .overflow_hidden()
             .bg(colors.sunken)
             .cursor_grab()
-            .on_scroll_wheel(move |event, window, cx| {
+            .on_scroll(move |event, window, cx| {
                 let bounds = scrolled.read(cx).bounds;
                 let delta = match event.delta {
                     ScrollDelta::Pixels(delta) => (f32::from(delta.x), f32::from(delta.y)),

@@ -3,8 +3,8 @@ use std::{cell::Cell, rc::Rc, time::Duration};
 use gpui::{
     AppContext as _, Bounds, Context, Entity, FocusHandle, InteractiveElement, IntoElement,
     KeyBinding, KeyUpEvent, Keystroke, Modifiers, ParentElement, Pixels, Render, ScrollDelta,
-    ScrollWheelEvent, Styled, TestAppContext, TouchPhase, VisualTestContext, Window, canvas, div,
-    point, px,
+    ScrollEvent, ScrollSource, Styled, TestAppContext, TouchPhase, VisualTestContext, Window,
+    canvas, div, point, px,
 };
 
 mod guides;
@@ -166,11 +166,12 @@ pub(super) fn settle(cx: &mut VisualTestContext) {
     cx.run_until_parked();
 }
 
-pub(super) fn press(key: &str, cx: &mut VisualTestContext) {
+pub(super) fn press(key: &'static str, cx: &mut VisualTestContext) {
     cx.simulate_keystrokes(key);
     settle(cx);
+    let os = cx.read(|app| app.platform_info().os);
     cx.simulate_event(KeyUpEvent {
-        keystroke: Keystroke::parse(key).expect("a key"),
+        keystroke: Keystroke::parse_with_os(key, os).expect("a key"),
     });
     settle(cx);
 }
@@ -412,7 +413,7 @@ fn a_tall_dialog_keeps_its_actions_in_the_window(cx: &mut TestAppContext) {
     let (view, cx) = stage(cx);
     cx.update(|_, cx| Theme::update(cx, |theme| theme.reduced_motion = true));
     show(&view, Open::Tall, cx);
-    std::thread::sleep(Duration::from_millis(2));
+    cx.executor().advance_clock(Duration::from_millis(2));
     settle(cx);
     let (size, margin, width, button) = cx.update(|window, cx| {
         let (theme, rem) = (cx.theme(), window.rem_size());
@@ -439,7 +440,7 @@ fn a_tall_dialog_body_keeps_its_height_and_scrolls(cx: &mut TestAppContext) {
     let (view, cx) = stage(cx);
     cx.update(|_, cx| Theme::update(cx, |theme| theme.reduced_motion = true));
     show(&view, Open::Tall, cx);
-    std::thread::sleep(Duration::from_millis(2));
+    cx.executor().advance_clock(Duration::from_millis(2));
     settle(cx);
     let tall = view.read_with(cx, |stage, _| stage.tall.clone());
     let before = tall.get();
@@ -447,11 +448,12 @@ fn a_tall_dialog_body_keeps_its_height_and_scrolls(cx: &mut TestAppContext) {
     let middle = cx
         .update(|window, _| window.viewport_size())
         .map(|side| side / 2.0);
-    cx.simulate_event(ScrollWheelEvent {
+    cx.simulate_event(ScrollEvent {
         position: point(middle.width, middle.height),
         delta: ScrollDelta::Pixels(point(px(0.0), px(-300.0))),
         modifiers: Modifiers::none(),
         touch_phase: TouchPhase::Moved,
+        source: ScrollSource::Pointer,
     });
     settle(cx);
     assert_eq!(
@@ -486,7 +488,7 @@ fn an_opening_dialog_rises_in_the_box_its_scrim_centers(cx: &mut TestAppContext)
     cx.run_until_parked();
     let top = |cx: &mut VisualTestContext| cx.debug_bounds("rising-body").expect("the body").top();
     let first = top(cx);
-    std::thread::sleep(Duration::from_millis(250));
+    cx.executor().advance_clock(Duration::from_millis(250));
     settle(cx);
     let lift = first - top(cx);
     assert!(

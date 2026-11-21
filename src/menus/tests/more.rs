@@ -1,17 +1,24 @@
-use gpui::{
-    Context, FocusHandle, InteractiveElement, IntoElement, KeyBinding, Modifiers, MouseButton,
-    OwnedMenu, OwnedMenuItem, ParentElement, Render, Styled, TestAppContext, VisualTestContext,
-    Window, actions, div, point, px,
-};
-
 use super::{press, settle};
 use crate::{
     menus::{MenuBar, PieItem, PieMenu},
     primitives::{FocusScope, IconName},
     theme::Theme,
 };
+use gpui::{
+    Action, App, Context, FocusHandle, InteractiveElement, IntoElement, KeyBinding,
+    KeyBindingContextPredicate, Modifiers, MouseButton, OwnedMenu, OwnedMenuItem, ParentElement,
+    Render, Styled, TestAppContext, VisualTestContext, Window, actions, div, point, px,
+};
+use std::rc::Rc;
 
 actions!(menu_bar_test, [OpenFile, Save, Undo, Deep]);
+
+fn binding<A: Action>(cx: &App, strokes: &str, action: A, context: Option<&str>) -> KeyBinding {
+    let predicate =
+        context.map(|c| Rc::new(KeyBindingContextPredicate::parse(c).expect("context")));
+    KeyBinding::load(strokes, Box::new(action), predicate, false, None, cx)
+        .unwrap_or_else(|error| panic!("bad keystroke {strokes:?}: {error}"))
+}
 
 /// A bar over two menus, the second with a submenu, recording what they dispatch.
 struct Bar {
@@ -68,7 +75,7 @@ impl Render for Bar {
 fn bar(cx: &mut TestAppContext) -> (gpui::Entity<Bar>, &mut VisualTestContext) {
     cx.update(|cx| {
         Theme::init(cx);
-        cx.bind_keys([KeyBinding::new("secondary-s", Save, None)]);
+        cx.bind_keys([binding(cx, "secondary-s", Save, None)]);
     });
     let (view, cx) = cx.add_window_view(|_, cx| Bar {
         root: cx.focus_handle(),

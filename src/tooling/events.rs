@@ -3,7 +3,7 @@ use std::{collections::VecDeque, fmt, rc::Rc, time::Duration};
 use gpui::{
     AnyElement, App, DispatchPhase, ElementId, InteractiveElement, IntoElement, KeyContext,
     Keystroke, Modifiers, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent, ParentElement,
-    Pixels, Point, RenderOnce, ScrollDelta, ScrollWheelEvent, StatefulInteractiveElement, Styled,
+    Pixels, Point, RenderOnce, ScrollDelta, ScrollEvent, StatefulInteractiveElement, Styled,
     Window, canvas, div, prelude::FluentBuilder,
 };
 use smallvec::SmallVec;
@@ -161,7 +161,10 @@ impl RenderOnce for EventLogger {
                         .iter()
                         .any(|context| context.get("logger").is_some_and(|logger| *logger == mark));
                     if inside && !lone_modifier(&event.keystroke) {
-                        down(Seen::KeyDown(event.keystroke.unparse()), cx)
+                        down(
+                            Seen::KeyDown(event.keystroke.unparse(cx.platform_info().os)),
+                            cx,
+                        )
                     }
                 })
             }
@@ -174,7 +177,12 @@ impl RenderOnce for EventLogger {
         let watched = div()
             .relative()
             .key_context(context)
-            .capture_key_up(move |event, _, cx| up(Seen::KeyUp(event.keystroke.unparse()), cx))
+            .capture_key_up(move |event, _, cx| {
+                up(
+                    Seen::KeyUp(event.keystroke.unparse(cx.platform_info().os)),
+                    cx,
+                )
+            })
             .on_modifiers_changed(move |event, _, cx| held(Seen::Modifiers(event.modifiers), cx))
             // Laid first, so its capture listeners run before any child's.
             .child(
@@ -204,7 +212,7 @@ impl RenderOnce for EventLogger {
                             }
                         });
                         let wheeled = record.clone();
-                        window.on_mouse_event(move |event: &ScrollWheelEvent, phase, _, cx| {
+                        window.on_mouse_event(move |event: &ScrollEvent, phase, _, cx| {
                             if inside(event.position, phase).is_some() {
                                 wheeled(Seen::Wheel(event.delta), cx)
                             }
