@@ -6,6 +6,7 @@ const GUIDES: [string, string][] = [
   ["", "Introduction"],
   ["installation", "Installation"],
   ["getting-started", "Getting started"],
+  ["gpui-kit", "GPUI Kit"],
   ["theme", "Theme"],
   ["focus", "Focus and keyboard"],
   ["motion", "Motion"],
